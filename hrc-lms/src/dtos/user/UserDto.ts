@@ -1,4 +1,4 @@
-export interface User {
+export interface UserDto {
     id: number;               // AUTO_INCREMENT, Primary Key
     pID: string;              // VARCHAR(12), unique personal ID
     username: string;         // VARCHAR(50), unique
@@ -10,7 +10,5 @@ export interface User {
     gender: boolean;          // BIT -> boolean
     dob: Date;                // DATETIME
     lockoutEnd?: Date | null; // DATETIME, có thể null
-    isEmailVerified: boolean; // BOOLEAN, default false
-    createdAt: Date;         // DATETIME (có typo: "creaatedAt" → nên sửa thành createdAt)
-    updatedAt: Date;          // DATETIME
+    isEmailVerified: boolean;
 }

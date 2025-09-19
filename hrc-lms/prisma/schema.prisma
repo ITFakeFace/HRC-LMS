@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int             @id @default(autoincrement())
+  pID             String          @unique @db.VarChar(12)
+  username        String          @unique @db.VarChar(50)
+  phone           String?         @unique @db.VarChar(10)
+  email           String          @unique @db.VarChar(100)
+  password        String          @db.VarChar(255)
+  avatar          Bytes?
+  fullname        String          @db.VarChar(100)
+  gender          Boolean
+  dob             DateTime
+  lockoutEnd      DateTime?
+  isEmailVerified Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+
+  userRoles     UserRole[]
+  refreshTokens RefreshToken[]
+}
+
+model Role {
+  id              Int              @id @default(autoincrement())
+  fullname        String           @unique @db.VarChar(50)
+  shortname       String           @unique @db.VarChar(15)
+
+  userRoles       UserRole[]
+  parentRoles     RoleHierarchy[]  @relation("ParentRoles")
+  childRoles      RoleHierarchy[]  @relation("ChildRoles")
+  rolePermissions RolePermission[]
+}
+
+model RoleHierarchy {
+  parentId Int
+  childId  Int
+
+  parent   Role @relation("ParentRoles", fields: [parentId], references: [id], onDelete: Cascade)
+  child    Role @relation("ChildRoles", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, childId])
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model Permission {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique @db.VarChar(100)
+  description String?         @db.VarChar(255)
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Course {
+  id Int @id @default(autoincrement())
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+}
+
+model Class {
+  id Int @id @default(autoincrement())
+}
+
+model Lesson {
+  id Int @id @default(autoincrement())
+}
+
+model Payment {
+  id Int @id @default(autoincrement())
+}
+
+model Enrollment {
+  id Int @id @default(autoincrement())
+}
+
+model RefreshToken {
+  id           Int      @id @default(autoincrement())
+  tokenId      String   @unique             // jti của refresh JWT
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked      Boolean  @default(false)
+  replacedBy   String?                       // tokenId của token thay thế (nếu có)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  ipAddress    String?                       // optional, để log
+  userAgent    String?                       // optional, để log
+
+  @@index([userId])
+  @@map("RefreshTokens")
+}
