@@ -1,10 +1,11 @@
 "use client"
-import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
-import GeneralNavbar from "@/components/layout/general/navbar/GeneralNavbar";
 import {Provider} from "react-redux";
-import {store} from "@/store/store";
+import {persistor, store} from "@/store/store";
+import {PersistGate} from "redux-persist/integration/react";
+import {PrimeReactProvider} from "primereact/api";
+import Tailwind from "primereact/passthrough/tailwind";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -23,12 +24,16 @@ export default function RootLayout({children,}: Readonly<{
         <html lang="en">
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased
-                flex flex-col min-h-screen
+                 min-h-screen
             `}
         >
-        <Provider store={store}>
-            {children}
-        </Provider>
+        <PrimeReactProvider value={{unstyled: true, pt: Tailwind}}>
+            <Provider store={store}>
+                <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
+                    {children}
+                </PersistGate>
+            </Provider>
+        </PrimeReactProvider>
         </body>
         </html>
     );

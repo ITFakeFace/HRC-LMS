@@ -5,6 +5,8 @@ interface UserInfo {
     email: string;
     username: string;
     avatar: string | null; // base64 string hoặc null
+    roles: string[];
+    permissions: string[];
 }
 
 interface AuthState {
@@ -27,6 +29,7 @@ const AuthSlice = createSlice({
             state,
             action: PayloadAction<{ token: string; user: UserInfo }>
         ) => {
+            console.log(`\n\nloginSuccess: ${JSON.stringify(action.payload)}\n\n`);
             state.token = action.payload.token;
             state.user = action.payload.user;
             state.isAuthenticated = true;

@@ -22,7 +22,10 @@ export async function POST(req: Request) {
     // Tạo response chính
     const res = NextResponse.json(ResponseModel.success({
         message: "Thành công!",
-        data: result.user,
+        data: {
+            user: result.user,
+            token: result.accessToken,
+        },
     }), {status: 200});
 
     // Set cookie trên response này

@@ -99,7 +99,8 @@ export async function verifyRefreshToken(token: string) {
         const {payload} = await jwtVerify(token, encoder.encode(process.env.REFRESH_TOKEN_SECRET!));
 
         const castedPayload = payload as unknown as { jti: string; userId: string };
-
+        if (!castedPayload.userId && payload.sub)
+            castedPayload.userId = payload.sub;
         if (!castedPayload.jti || !castedPayload.userId) return null;
         return castedPayload;
     } catch {

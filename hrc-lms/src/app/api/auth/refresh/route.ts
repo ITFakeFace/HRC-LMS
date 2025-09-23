@@ -3,8 +3,10 @@ import {verifyRefreshToken, signAccessToken} from "@/utils/jwt";
 import {prisma} from "@/lib/prisma";
 import {REFRESH_TOKEN_COOKIE, ACCESS_TOKEN_COOKIE} from "@/utils/cookies";
 import {ResponseModel} from "@/models/ResponseModel";
+import {AuthService} from "@/services/AuthService";
 
 export const runtime = "nodejs";
+const authService = new AuthService();
 
 export async function POST(req: Request) {
     try {
@@ -25,53 +27,20 @@ export async function POST(req: Request) {
             );
         }
 
-        // Kiểm tra DB
-        const storedToken = await prisma.refreshToken.findUnique({
-            where: {tokenId: refreshToken},
-        });
+        const {accessToken, refreshToken: newRefreshToken, user} =
+            await authService.refreshTokens(refreshToken);
 
-        if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
-            return NextResponse.json(
-                ResponseModel.error({
-                    message: "Refresh token expired",
-                    statusCode: 401,
-                    data: null,
-                }),
-                {status: 401}
-            );
-        }
-
-        // Verify refresh token signature
-        const payload = await verifyRefreshToken(refreshToken);
-        if (!payload) {
-            return NextResponse.json(
-                ResponseModel.error({
-                    message: "Invalid refresh token",
-                    statusCode: 401,
-                    data: null,
-                }),
-                {status: 401}
-            );
-        }
-
-        // Tạo access token mới
-        const newAccessToken = await signAccessToken({sub: Number(payload.userId)});
-
-        // Response
         const res = NextResponse.json(
             ResponseModel.success({
                 message: "Access token refreshed successfully",
                 statusCode: 200,
-                data: {
-                    accessToken: newAccessToken,
-                    user: {id: payload.userId},
-                },
+                data: {accessToken, user},
             }),
             {status: 200}
         );
 
         // Set lại cookie access token
-        res.cookies.set(ACCESS_TOKEN_COOKIE, newAccessToken, {
+        res.cookies.set(ACCESS_TOKEN_COOKIE, accessToken, {
             httpOnly: true,
             sameSite: "lax",
             path: "/",
@@ -79,16 +48,25 @@ export async function POST(req: Request) {
             maxAge: 60 * 15, // 15 phút
         });
 
+        // Set lại refresh token mới
+        res.cookies.set(REFRESH_TOKEN_COOKIE, newRefreshToken, {
+            httpOnly: true,
+            sameSite: "lax",
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 24 * 7, // 7 ngày
+        });
+
         return res;
     } catch (err) {
         console.error("Refresh token error:", err);
         return NextResponse.json(
             ResponseModel.error({
-                message: "Internal Server Error",
-                statusCode: 500,
-                data: err,
+                message: "Invalid or expired refresh token",
+                statusCode: 401,
+                data: null,
             }),
-            {status: 500}
+            {status: 401}
         );
     }
 }

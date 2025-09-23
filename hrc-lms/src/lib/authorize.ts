@@ -27,14 +27,14 @@ export async function authorize(req: NextRequest, permission: string) {
 
 
 export function authorizeRequest(
-    handler: (req: NextRequest, userId: string) => Promise<NextResponse>,
+    handler: (req: NextRequest, userId: string, params?: any) => Promise<NextResponse>,
     permission: string
 ) {
-    return async function (req: NextRequest) {
+    return async function (req: NextRequest, {params}: { params: any }) {
         const auth = await authorize(req, permission);
         if (auth instanceof NextResponse) return auth;
 
-        // auth trả về userId nếu hợp lệ
-        return handler(req, auth);
+        // auth = userId nếu hợp lệ
+        return handler(req, auth, params);
     };
 }

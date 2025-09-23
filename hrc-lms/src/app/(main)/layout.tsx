@@ -22,22 +22,16 @@ export default function RootLayout({children,}: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-        <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased
-                flex flex-col min-h-screen
-            `}
-        >
-        <GeneralNavbar/>
-        <main className={`flex-grow`}>
-            {children}
-        </main>
-        <footer className={`w-full flex flex-row justify-between bg-primary`}>
-            <div>
-                Contact us
-            </div>
-        </footer>
-        </body>
-        </html>
+        <div className={`flex flex-col min-h-screen`}>
+            <GeneralNavbar/>
+            <main className={`flex-grow`}>
+                {children}
+            </main>
+            <footer className={`w-full flex flex-row justify-between bg-primary`}>
+                <div>
+                    Contact us
+                </div>
+            </footer>
+        </div>
     );
 }

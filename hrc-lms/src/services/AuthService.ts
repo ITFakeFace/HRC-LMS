@@ -64,6 +64,32 @@ export class AuthService {
         const user = await this.validateUser(email, password);
         if (!user) return null;
 
+        // Lấy roles + permissions
+        const dbUser = await prisma.user.findUnique({
+            where: {id: user.id},
+            include: {
+                userRoles: {
+                    include: {
+                        role: {
+                            include: {
+                                rolePermissions: {
+                                    include: {
+                                        permission: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        const roles = dbUser?.userRoles.map(ur => ur.role.shortname) || [];
+        const permissions =
+            dbUser?.userRoles.flatMap(ur =>
+                ur.role.rolePermissions.map(rp => rp.permission.name)
+            ) || [];
+
         const {accessToken, refreshToken, refreshTokenExpiry} =
             await this.createTokensForUser(user, rememberMe);
 
@@ -73,6 +99,8 @@ export class AuthService {
                 email: user.email,
                 username: user.username,
                 avatar: user.avatar,
+                roles,
+                permissions,
             },
             accessToken,
             refreshToken,
@@ -80,11 +108,22 @@ export class AuthService {
         };
     }
 
+
     // -----------------------------
     // Validate user credentials (login)
     // -----------------------------
     async validateUser(email: string, password: string) {
-        const user = await prisma.user.findUnique({where: {email}});
+        const user = await prisma.user.findUnique(
+            {
+                where: {email},
+                include: {
+                    userRoles: {
+                        include: {
+                            role: true, // lấy thông tin role trong UserRole
+                        },
+                    },
+                },
+            });
         if (!user) return null;
 
         const ok = await bcrypt.compare(password, user.password);

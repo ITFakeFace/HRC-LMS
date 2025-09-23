@@ -5,6 +5,7 @@ import {useRouter} from "next/navigation";
 import {loginSuccess} from "@/store/AuthSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/store/store";
+import axios from "axios";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -84,21 +85,14 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(formData),
+            const res = await axios.post("/api/auth/login", formData, {
+                headers: {"Content-Type": "application/json"}
             });
-            const data = await res.json();
 
-            if (!res.ok) {
-                setErrors({email: data.error || "Đăng nhập thất bại"});
-                setIsLoading(false);
-                return;
-            }
+            const {token, user} = res.data.data; // ✅ axios trả data trong `res.data`
 
-            // ✅ Cập nhật Redux store
-            dispatch(loginSuccess({token: data.token, user: data.user}));
+            // Cập nhật Redux store
+            dispatch(loginSuccess({token, user}));
 
             setShowSuccess(true);
             setIsLoading(false);
@@ -107,10 +101,18 @@ export default function LoginPage() {
                 setShowSuccess(false);
                 router.push("/");
             }, 2000);
-        } catch (err) {
+
+        } catch (err: any) {
             console.error("Login error:", err);
+
             setIsLoading(false);
-            setErrors({email: "Có lỗi xảy ra, vui lòng thử lại!"});
+
+            // axios có err.response nếu server trả lỗi
+            if (err.response?.data?.error) {
+                setErrors({email: err.response.data.error});
+            } else {
+                setErrors({email: "Có lỗi xảy ra, vui lòng thử lại!"});
+            }
         }
     };
 
