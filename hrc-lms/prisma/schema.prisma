@@ -8,29 +8,32 @@ datasource db {
 }
 
 model User {
-  id              Int             @id @default(autoincrement())
-  pID             String          @unique @db.VarChar(12)
-  username        String          @unique @db.VarChar(50)
-  phone           String?         @unique @db.VarChar(10)
-  email           String          @unique @db.VarChar(100)
-  password        String          @db.VarChar(255)
+  id              Int       @id @default(autoincrement())
+  pID             String    @unique @db.VarChar(12)
+  username        String    @unique @db.VarChar(50)
+  phone           String?   @unique @db.VarChar(10)
+  email           String    @unique @db.VarChar(100)
+  password        String    @db.VarChar(255)
   avatar          Bytes?
-  fullname        String          @db.VarChar(100)
+  fullname        String    @db.VarChar(100)
   gender          Boolean
   dob             DateTime
   lockoutEnd      DateTime?
-  isEmailVerified Boolean         @default(false)
-  createdAt       DateTime        @default(now())
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
   updatedAt       DateTime
 
-  userRoles     UserRole[]
-  refreshTokens RefreshToken[]
+  userRoles      UserRole[]
+  refreshTokens  RefreshToken[]
+  createdCourses Course[]       @relation("CreatedCourses")
+  editedCourses  Course[]       @relation("EditedCourses")
+  HRCClass       HRCClass[]
 }
 
 model Role {
-  id              Int              @id @default(autoincrement())
-  fullname        String           @unique @db.VarChar(50)
-  shortname       String           @unique @db.VarChar(15)
+  id        Int    @id @default(autoincrement())
+  fullname  String @unique @db.VarChar(50)
+  shortname String @unique @db.VarChar(15)
 
   userRoles       UserRole[]
   parentRoles     RoleHierarchy[]  @relation("ParentRoles")
@@ -42,8 +45,8 @@ model RoleHierarchy {
   parentId Int
   childId  Int
 
-  parent   Role @relation("ParentRoles", fields: [parentId], references: [id], onDelete: Cascade)
-  child    Role @relation("ChildRoles", fields: [childId], references: [id], onDelete: Cascade)
+  parent Role @relation("ParentRoles", fields: [parentId], references: [id], onDelete: Cascade)
+  child  Role @relation("ChildRoles", fields: [childId], references: [id], onDelete: Cascade)
 
   @@id([parentId, childId])
 }
@@ -59,9 +62,9 @@ model UserRole {
 }
 
 model Permission {
-  id          Int             @id @default(autoincrement())
-  name        String          @unique @db.VarChar(100)
-  description String?         @db.VarChar(255)
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(100)
+  description String? @db.VarChar(255)
 
   rolePermissions RolePermission[]
 }
@@ -77,15 +80,54 @@ model RolePermission {
 }
 
 model Course {
-  id Int @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
+  name              String   @db.VarChar(255)
+  description       String   @db.VarChar(255)
+  requirements      Json
+  coverImage        Bytes?
+  courseObjectives  Json
+  targetLearners    Json?
+  courseDuration    Json
+  assessmentMethods Json?
+  status            Int      @default(0)
+  creatorId         Int
+  lastEditor        Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime
+
+  creator    User             @relation("CreatedCourses", fields: [creatorId], references: [id])
+  editor     User             @relation("EditedCourses", fields: [lastEditor], references: [id])
+  categories CourseCategory[]
+}
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(255)
+  description String? @db.VarChar(255)
+
+  courses CourseCategory[]
+}
+
+model CourseCategory {
+  courseId   Int
+  categoryId Int
+
+  course   Course   @relation(fields: [courseId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@id([courseId, categoryId])
 }
 
 model Session {
   id Int @id @default(autoincrement())
 }
 
-model Class {
-  id Int @id @default(autoincrement())
+model HRCClass {
+  id     Int   @id @default(autoincrement())
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
+
+  @@map("Classes")
 }
 
 model Lesson {
@@ -101,16 +143,16 @@ model Enrollment {
 }
 
 model RefreshToken {
-  id           Int      @id @default(autoincrement())
-  tokenId      String   @unique             // jti của refresh JWT
-  userId       Int
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  revoked      Boolean  @default(false)
-  replacedBy   String?                       // tokenId của token thay thế (nếu có)
-  createdAt    DateTime @default(now())
-  expiresAt    DateTime
-  ipAddress    String?                       // optional, để log
-  userAgent    String?                       // optional, để log
+  id         Int      @id @default(autoincrement())
+  tokenId    String   @unique // jti của refresh JWT
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked    Boolean  @default(false)
+  replacedBy String? // tokenId của token thay thế (nếu có)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  ipAddress  String? // optional, để log
+  userAgent  String? // optional, để log
 
   @@index([userId])
   @@map("RefreshTokens")

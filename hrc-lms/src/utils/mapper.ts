@@ -1,5 +1,8 @@
 import {UserCreateDto} from "@/dtos/user/UserCreateDto";
 import {UserDto} from "@/dtos/user/UserDto";
+import {CategoryDto} from "@/dtos/category/CategoryDto";
+import {CategoryCreateDto} from "@/dtos/category/CategoryCreateDto";
+import {CategoryUpdateDto} from "@/dtos/category/CategoryUpdateDto";
 
 export class UserMapper {
     /**
@@ -57,6 +60,40 @@ export class UserMapper {
             dob: entity.dob,
             lockoutEnd: entity.lockoutEnd ?? null,
             isEmailVerified: entity.isEmailVerified,
+        };
+    }
+}
+
+export class CategoryMapper {
+    /**
+     * Map từ CategoryCreateDto sang object để lưu DB
+     */
+    static fromCreateDto(dto: CategoryCreateDto) {
+        return {
+            name: dto.name,
+            description: dto.description ?? null,
+        };
+    }
+
+    /**
+     * Map từ CategoryUpdateDto sang object để cập nhật DB
+     */
+    static fromUpdateDto(dto: CategoryUpdateDto) {
+        return {
+            name: dto.name,
+            description: dto.description ?? null,
+            updatedAt: new Date(),
+        };
+    }
+
+    /**
+     * Map từ entity trong DB sang CategoryDto
+     */
+    static toDto(entity: any): CategoryDto {
+        return {
+            id: entity.id,
+            name: entity.name,
+            description: entity.description,
         };
     }
 }

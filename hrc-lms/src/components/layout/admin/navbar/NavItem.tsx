@@ -31,7 +31,6 @@ const NavItem: React.FC<NavItemProps> = (
     const pathname = usePathname(); // lấy đường dẫn hiện tại
     const router = useRouter();
     const checkActiveCondition = () => {
-        console.log(normalizePath(pathname) + " " + normalizePath(activeCondition));
         if (matchType === MatchTypes.Exact) {
             return normalizePath(pathname) === normalizePath(activeCondition);
         }

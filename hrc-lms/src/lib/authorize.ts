@@ -9,6 +9,7 @@ export async function authorize(req: NextRequest, permission: string) {
     if (!token) return NextResponse.json({message: "Unauthorized token"}, {status: 401});
 
     const payload = await verifyJWT(token);
+
     if (!payload) return NextResponse.json({message: "Unauthorized payload"}, {status: 401});
 
     const userRoles = await prisma.userRole.findMany({

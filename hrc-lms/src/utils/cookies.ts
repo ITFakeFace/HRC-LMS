@@ -8,17 +8,16 @@ export function setAuthCookies(res: NextResponse, accessToken: string, refreshTo
     res.cookies.set("access_token", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: ms("15m"), // access token sống ngắn
     });
 
     res.cookies.set("refresh_token", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: refreshTokenExpiry / 1000, // đổi sang giây
     });
-
 }
 
 export function clearAuthCookies(res: NextResponse) {

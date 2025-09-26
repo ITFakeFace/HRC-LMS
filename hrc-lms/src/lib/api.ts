@@ -2,10 +2,30 @@ import axios, {AxiosRequestConfig} from "axios";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json"
     }
 });
+
+api.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+        if (error.response?.status === 401) {
+            try {
+                // gọi refresh API
+                await api.post("/auth/refresh");
+
+                // retry request gốc
+                return api.request(error.config);
+            } catch (refreshErr) {
+                console.error("Refresh failed:", refreshErr);
+                window.location.href = "/login";
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 // Wrapper: GET / POST / PUT / DELETE
 const APIClient = {
@@ -34,4 +54,6 @@ const APIClient = {
     }
 };
 
+// Xuất cả APIClient (cho tiện gọi) và api (cho interceptor)
+export {api};
 export default APIClient;

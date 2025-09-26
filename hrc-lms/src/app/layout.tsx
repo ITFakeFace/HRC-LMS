@@ -27,7 +27,7 @@ export default function RootLayout({children,}: Readonly<{
                  min-h-screen
             `}
         >
-        <PrimeReactProvider value={{unstyled: true, pt: Tailwind}}>
+        <PrimeReactProvider>
             <Provider store={store}>
                 <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
                     {children}
