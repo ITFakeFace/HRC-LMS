@@ -1,5 +1,5 @@
 "use client";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {FilterMatchMode, FilterOperator} from "primereact/api";
 import {Avatar} from "primereact/avatar";
 import {Tag} from "primereact/tag";
@@ -13,6 +13,10 @@ import {Column} from "primereact/column";
 import {UserDto} from "@/dtos/user/UserDto";
 import APIClient from "@/lib/api";
 import {ResponseModel} from "@/models/ResponseModel";
+import {useRouter} from "next/navigation";
+import {ProgressBar} from "primereact/progressbar";
+import {ConfirmDialog, confirmDialog} from "primereact/confirmdialog";
+import {refresh} from "effect/Resource";
 
 const AccountsListPage = () => {
     const [users, setUsers] = useState([]);
@@ -30,6 +34,7 @@ const AccountsListPage = () => {
         createdAt: {operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.DATE_IS}]},
         lockoutEnd: {operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.DATE_IS}]}
     });
+    const router = useRouter();
 
     const toast = useRef<Toast>(null);
 
@@ -44,6 +49,40 @@ const AccountsListPage = () => {
             console.log("Fetch Users Failed: ", res.message);
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    const refreshUsers = async () => {
+        await fetchUsers();
+    }
+
+    const deleteUser = async (user) => {
+        try {
+            const res: ResponseModel = await APIClient.delete(`/api/protected/users/${user.id}`);
+            if (res.status == true) {
+                toast.current.show({
+                    severity: 'success',
+                    summary: 'Thành công',
+                    detail: 'Đã xóa user thành công',
+                    life: 3000
+                });
+                await refreshUsers();
+            } else {
+                toast.current.show({
+                    severity: 'danger',
+                    summary: 'Thất bại',
+                    detail: 'Đã xóa user thất bại',
+                    life: 3000
+                });
+            }
+        } catch {
+            toast.current.show({
+                severity: 'success',
+                summary: 'Lỗi',
+                detail: 'Có lỗi xảy ra',
+                life: 3000
+            });
+            console.log("Failed to Delete User: ", id);
         }
     }
 
@@ -125,16 +164,24 @@ const AccountsListPage = () => {
         return (
             <div className="flex gap-2">
                 <Button
+                    icon="pi pi-eye"
+                    className="p-button-rounded p-button-info p-button-text"
+                    onClick={() => router.push(`/admin/accounts/${rowData.id}`)}
+                    tooltip="Xem chi tiết"
+                    tooltipOptions={{position: 'top'}}
+                />
+                <Button
                     icon="pi pi-pencil"
-                    className="p-button-rounded p-button-text p-button-info"
-                    onClick={() => editUser(rowData)}
-                    tooltip="Edit"
+                    className="p-button-rounded p-button-success p-button-text"
+                    tooltip="Chỉnh sửa"
+                    tooltipOptions={{position: 'top'}}
                 />
                 <Button
                     icon="pi pi-trash"
-                    className="p-button-rounded p-button-text p-button-danger"
+                    className="p-button-rounded p-button-danger p-button-text"
                     onClick={() => confirmDeleteUser(rowData)}
-                    tooltip="Delete"
+                    tooltip="Xóa"
+                    tooltipOptions={{position: 'top'}}
                 />
             </div>
         );
@@ -149,26 +196,17 @@ const AccountsListPage = () => {
         });
     };
 
-    const confirmDeleteUser = (user: UserDto) => {
-        toast.current?.show({
-            severity: 'warn',
-            summary: 'Delete User',
-            detail: `Delete user: ${user.fullname}?`,
-            life: 3000
-        });
-    };
-
     const renderHeader = () => {
         return (
             <div className="flex justify-between items-center">
-                <h2 className="m-0 text-2xl font-bold">Users Management</h2>
+                <h2 className="m-0 text-2xl font-bold">Danh sách tài khoản</h2>
                 <div className="flex gap-2">
                     <span className="p-input-icon-left">
                         <i className="pi pi-search"/>
                         <InputText
                             value={globalFilterValue}
                             onChange={onGlobalFilterChange}
-                            placeholder="Global Search"
+                            placeholder="   Tìm kiếm"
                         />
                     </span>
                     <Button
@@ -180,14 +218,9 @@ const AccountsListPage = () => {
                     />
                     <Button
                         icon="pi pi-plus"
-                        label="Add User"
+                        label="Thêm tài khoản"
                         className="p-button-success"
-                        onClick={() => toast.current?.show({
-                            severity: 'success',
-                            summary: 'Add User',
-                            detail: 'Add new user functionality',
-                            life: 3000
-                        })}
+                        onClick={() => router.push('/admin/accounts/edit')}
                     />
                 </div>
             </div>
@@ -238,9 +271,22 @@ const AccountsListPage = () => {
         );
     };
 
+    const confirmDeleteUser = (user) => {
+        confirmDialog({
+            message: `Bạn có chắc chắn muốn xóa User số "${user.id}:${user.fullname}"?`,
+            header: 'Xác nhận xóa',
+            icon: 'pi pi-info-circle',
+            acceptClassName: 'p-button-danger',
+            accept: () => deleteUser(user),
+            acceptLabel: 'Có',
+            rejectLabel: 'Không'
+        });
+    };
+
     return (
         <div className="bg-gray-50 p-4">
             <Toast ref={toast}/>
+            <ConfirmDialog/>
 
             <div className="bg-white rounded-lg shadow-sm">
                 <DataTable
@@ -353,6 +399,11 @@ const AccountsListPage = () => {
                     />
                 </DataTable>
             </div>
+            {loading && (
+                <div className="fixed top-0 left-0 w-full z-50">
+                    <ProgressBar mode="indeterminate" style={{height: '3px'}}/>
+                </div>
+            )}
         </div>
     );
 }

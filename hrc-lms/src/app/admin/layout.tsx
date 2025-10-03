@@ -1,7 +1,16 @@
 "use client"
 import RequiredRolePage from "@/components/security/RequiredRolePage";
 import React from "react";
-import {faBell, faCompress, faExpand, faHome, faSchool, faSignOut, faUser} from "@fortawesome/free-solid-svg-icons";
+import {
+    faBell,
+    faCompress,
+    faExpand,
+    faHome,
+    faSchool,
+    faSignOut,
+    faUser,
+    faUserLock
+} from "@fortawesome/free-solid-svg-icons";
 import NavItem, {MatchTypes} from "@/components/layout/admin/navbar/NavItem";
 import {IconTypes} from "@/components/general/IconWrapper";
 import {useRouter} from "next/navigation";
@@ -63,6 +72,15 @@ const AdminLayout = ({children,}: Readonly<{
                             icon={faUser}
                             url={"/admin/accounts"}
                             activeCondition={"/admin/accounts"}
+                            isCollapsed={navCollapsed}
+                            matchType={MatchTypes.Prefix}
+                        />
+                        <NavItem
+                            text={"Roles"}
+                            iconType={IconTypes.FontAwesome}
+                            icon={faUserLock}
+                            url={"/admin/roles"}
+                            activeCondition={"/admin/roles"}
                             isCollapsed={navCollapsed}
                             matchType={MatchTypes.Prefix}
                         />

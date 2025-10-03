@@ -1,4 +1,4 @@
-import {SignJWT, jwtVerify, JWTPayload} from "jose";
+import {SignJWT, jwtVerify, JWTPayload, decodeJwt} from "jose";
 import {prisma} from "@/lib/prisma"; // Prisma client
 import crypto from "crypto";
 
@@ -73,20 +73,40 @@ export async function signRefreshToken(payload: { sub: number, [key: string]: an
 // ----------------------
 // Verify Access Token
 // ----------------------
+interface CustomJWTPayload extends JWTPayload {
+    userId?: string;
+    email?: string;
+    roles?: string[];
+    permissions?: string[];
+}
+
 export async function verifyAccessToken(token: string) {
     try {
-        const {payload} = await jwtVerify(token, encoder.encode(process.env.JWT_SECRET!));
+        const secret = process.env.JWT_SECRET;
+        if (!secret) throw new Error("JWT_SECRET is not defined");
 
-        const castedPayload = payload as unknown as {
-            userId: string;
-            email?: string;
-            roles?: string[];
-            permissions?: string[];
+        const {payload} = await jwtVerify(
+            token,
+            new TextEncoder().encode(secret)
+        );
+
+        const castedPayload = payload as CustomJWTPayload;
+
+        // Nếu token dùng sub thay cho userId → fallback luôn
+        const userId = castedPayload.userId || castedPayload.sub;
+        if (!userId) return null;
+
+        return {
+            userId,
+            email: castedPayload.email,
+            roles: castedPayload.roles,
+            permissions: castedPayload.permissions,
+            exp: castedPayload.exp,
+            iat: castedPayload.iat,
+            sub: castedPayload.sub,
         };
-
-        if (!castedPayload.userId) return null; // bắt buộc userId tồn tại
-        return castedPayload;
-    } catch {
+    } catch (error) {
+        console.log(error);
         return null;
     }
 }
@@ -108,7 +128,7 @@ export async function verifyRefreshToken(token: string) {
     }
 }
 
-export async function verifyJWT(token: string): Promise<JwtPayload | null> {
+export async function verifyJWT(token: string): Promise<CustomJWTPayload | null> {
     try {
         const secret = process.env.JWT_SECRET;
         if (!secret) throw new Error("JWT_SECRET is not defined");
@@ -119,11 +139,35 @@ export async function verifyJWT(token: string): Promise<JwtPayload | null> {
 
         return {
             ...payload,
-            userId: Number(payload.sub), // map sub → userId
-        } as unknown as JwtPayload;
-    } catch (err) {
+            userId: Number(payload.sub),
+        } as unknown as CustomJWTPayload;
+    } catch (err: any) {
         console.error("verifyJWT error:", err);
-        return null;
+
+        // ✅ Decode token thủ công khi verify thất bại
+        try {
+            const decoded = decodeJwt(token);
+
+            // ✅ Kiểm tra exp (nếu có)
+            if (decoded.exp) {
+                const nowInSeconds = Math.floor(Date.now() / 1000);
+                if (decoded.exp < nowInSeconds) {
+                    console.warn("Token đã hết hạn theo exp claim");
+                    return null;
+                }
+            }
+
+            // ✅ Nếu không có sub thì không hợp lệ
+            if (!decoded.sub) return null;
+
+            return {
+                ...decoded,
+                userId: Number(decoded.sub),
+            } as unknown as CustomJWTPayload;
+        } catch (decodeError) {
+            console.error("decodeJwt error:", decodeError);
+            return null;
+        }
     }
 }
 

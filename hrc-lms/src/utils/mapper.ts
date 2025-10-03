@@ -97,3 +97,48 @@ export class CategoryMapper {
         };
     }
 }
+
+import {RoleCreateDto} from "@/dtos/role/RoleCreateDto";
+import {RoleUpdateDto} from "@/dtos/role/RoleUpdateDto";
+import {RoleDto} from "@/dtos/role/RoleDto";
+
+export class RoleMapper {
+    /**
+     * Map từ RoleCreateDto sang object để lưu DB
+     */
+    static fromCreateDto(dto: RoleCreateDto) {
+        return {
+            fullname: dto.fullname,
+            shortname: dto.shortname,
+        };
+    }
+
+    /**
+     * Map từ RoleUpdateDto sang object để cập nhật DB
+     */
+    static fromUpdateDto(dto: RoleUpdateDto) {
+        return {
+            fullname: dto.fullname,
+            shortname: dto.shortname,
+        };
+    }
+
+    /**
+     * Map từ entity trong DB sang RoleDto
+     */
+    static toDto(entity: any): RoleDto {
+        return {
+            id: entity.id,
+            fullname: entity.fullname,
+            shortname: entity.shortname,
+            parentRoles: entity.parentRoles?.map((pr: any) => ({
+                parentId: pr.parentId,
+                childId: pr.childId,
+            })) ?? [],
+            childRoles: entity.childRoles?.map((cr: any) => ({
+                parentId: cr.parentId,
+                childId: cr.childId,
+            })) ?? [],
+        };
+    }
+}

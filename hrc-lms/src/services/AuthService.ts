@@ -175,6 +175,7 @@ export class AuthService {
         const jti = payload.jti;
 
         const storedToken = await prisma.refreshToken.findUnique({where: {tokenId: jti}});
+        console.log(storedToken);
         if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
             throw new Error("Invalid or expired refresh token");
         }

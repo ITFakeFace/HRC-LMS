@@ -14,7 +14,8 @@ const getUserById = async (
     params: { id: string }
 ) => {
     try {
-        const userId = Number(params.id);
+        const {id} = await params;
+        const userId = Number(id);
         const user = await service.getUserById(userId);
 
         if (!user) {
