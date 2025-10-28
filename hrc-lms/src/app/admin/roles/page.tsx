@@ -17,115 +17,14 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import APIClient from "@/lib/api";
 import {ResponseModel} from "@/models/ResponseModel";
+import {router} from "next/client";
+import {useRouter} from "next/navigation";
 // import axios from 'axios';
 
 // Mock axios for demo purposes - replace with actual axios import
-const mockAxios = {
-    get: async (url) => {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Mock data based on Role schema
-        return {
-            data: {
-                success: true,
-                data: [
-                    {
-                        id: 1,
-                        fullname: "Administrator",
-                        shortname: "ADMIN",
-                        userRoles: [
-                            {id: 1, userId: 1},
-                            {id: 2, userId: 3}
-                        ],
-                        parentRoles: [],
-                        childRoles: [
-                            {id: 1, childRoleId: 2}
-                        ],
-                        rolePermissions: [
-                            {id: 1, permissionId: 1},
-                            {id: 2, permissionId: 2},
-                            {id: 3, permissionId: 3}
-                        ]
-                    },
-                    {
-                        id: 2,
-                        fullname: "Manager",
-                        shortname: "MGR",
-                        userRoles: [
-                            {id: 3, userId: 2},
-                            {id: 4, userId: 4},
-                            {id: 5, userId: 5}
-                        ],
-                        parentRoles: [
-                            {id: 1, parentRoleId: 1}
-                        ],
-                        childRoles: [
-                            {id: 2, childRoleId: 3}
-                        ],
-                        rolePermissions: [
-                            {id: 4, permissionId: 2},
-                            {id: 5, permissionId: 4}
-                        ]
-                    },
-                    {
-                        id: 3,
-                        fullname: "Employee",
-                        shortname: "EMP",
-                        userRoles: [
-                            {id: 6, userId: 6},
-                            {id: 7, userId: 7},
-                            {id: 8, userId: 8},
-                            {id: 9, userId: 9}
-                        ],
-                        parentRoles: [
-                            {id: 2, parentRoleId: 2}
-                        ],
-                        childRoles: [],
-                        rolePermissions: [
-                            {id: 6, permissionId: 5}
-                        ]
-                    },
-                    {
-                        id: 4,
-                        fullname: "Guest User",
-                        shortname: "GUEST",
-                        userRoles: [
-                            {id: 10, userId: 10}
-                        ],
-                        parentRoles: [],
-                        childRoles: [],
-                        rolePermissions: []
-                    },
-                    {
-                        id: 5,
-                        fullname: "Support Agent",
-                        shortname: "SUPPORT",
-                        userRoles: [
-                            {id: 11, userId: 11},
-                            {id: 12, userId: 12}
-                        ],
-                        parentRoles: [],
-                        childRoles: [],
-                        rolePermissions: [
-                            {id: 7, permissionId: 6},
-                            {id: 8, permissionId: 7}
-                        ]
-                    }
-                ],
-                total: 5,
-                page: 1,
-                pageSize: 10
-            }
-        };
-    },
-    delete: async (url) => {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return {data: {success: true, message: "Role deleted successfully"}};
-    }
-};
 
 const RoleListPage = () => {
+    const router = useRouter();
     const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -243,9 +142,9 @@ const RoleListPage = () => {
             setLoading(true);
 
             // In real implementation, you might want to batch delete
-            await Promise.all(
-                selectedRoles.map(role => mockAxios.delete(`/api/protected/roles/${role.id}`))
-            );
+            // await Promise.all(
+            //     selectedRoles.map(role => mockAxios.delete(`/api/protected/roles/${role.id}`))
+            // );
 
             toast.current.show({
                 severity: 'success',
@@ -283,7 +182,7 @@ const RoleListPage = () => {
     const deleteRole = async (role) => {
         try {
             setLoading(true);
-            await mockAxios.delete(`/api/protected/roles/${role.id}`);
+            // await mockAxios.delete(`/api/protected/roles/${role.id}`);
 
             toast.current.show({
                 severity: 'success',
@@ -404,6 +303,7 @@ const RoleListPage = () => {
                     label="Thêm mới"
                     icon="pi pi-plus"
                     className="p-button-success"
+                    onClick={() => router.push('/admin/roles/edit')}
                 />
                 <Button
                     label="Xóa đã chọn"

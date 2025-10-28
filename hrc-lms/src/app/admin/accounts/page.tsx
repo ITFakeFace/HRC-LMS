@@ -175,6 +175,7 @@ const AccountsListPage = () => {
                     className="p-button-rounded p-button-success p-button-text"
                     tooltip="Chỉnh sửa"
                     tooltipOptions={{position: 'top'}}
+                    onClick={() => router.push(`/admin/accounts/edit/${rowData.id}`)}
                 />
                 <Button
                     icon="pi pi-trash"

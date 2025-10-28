@@ -55,37 +55,62 @@ export class UserService {
         return {user, errors: []};
     }
 
-
     // -----------------------------
     // Update existing user
     // -----------------------------
     async updateUser(id: string, data: UserUpdateDto) {
-        // 1. Chuẩn bị dữ liệu update
+        // 1. Chuẩn bị dữ liệu update (Tạo bản sao để chỉnh sửa)
         const updatedData: UserUpdateDto = {...data};
 
         // Gán updatedAt (theo schema, bạn có thể cần set thủ công nếu không dùng `updatedAt` tự động của Prisma)
         updatedData.updatedAt = new Date();
 
-        // 2. Hash mật khẩu mới nếu có
-        if (data.password) {
-            updatedData.password = await PasswordHasher.getHashedPassword(data.password);
+        // 2. Xử lý Mật khẩu: Chỉ hash và cập nhật nếu có giá trị
+        if (updatedData.password) {
+            // Nếu có password được gửi, hash nó
+            updatedData.password = await PasswordHasher.getHashedPassword(updatedData.password);
+        } else {
+            // Nếu password là rỗng ("") hoặc undefined, loại bỏ trường này khỏi payload
+            // Điều này đảm bảo mật khẩu cũ KHÔNG bị thay thế hoặc cập nhật lại
+            delete updatedData.password;
         }
 
-        // 3. Xử lý các trường có thể bị xóa/set null (ví dụ: avatar, phone, lockoutEnd)
-        // Đảm bảo client gửi `null` thay vì bỏ qua trường đó nếu muốn xóa giá trị cũ.
-        // Tuy nhiên, việc này phụ thuộc vào cách bạn thiết kế UserUpdateDto.
-        // Giả sử DTO cho phép các trường optional:
+        // 3. Xử lý các trường tùy chọn (Nullable Fields)
+        // Đảm bảo các trường này được gửi `null` nếu client muốn xóa/bỏ đặt giá trị cũ.
+        // Nếu các trường này là `undefined` (không gửi từ client), chúng sẽ bị bỏ qua (không cập nhật).
+        // Nếu client gửi `null`, chúng sẽ được cập nhật thành `null`.
+
+        if (updatedData.phone === "") {
+            updatedData.phone = null;
+        }
+        updatedData.phone = updatedData.phone ?? undefined; // undefined: giữ nguyên, null: xóa
+
+        updatedData.avatar = updatedData.avatar ?? undefined; // undefined: giữ nguyên, Buffer/null: cập nhật
+
+        if ((updatedData.lockoutEnd as any) === "") {
+            updatedData.lockoutEnd = null;
+        }
+        updatedData.lockoutEnd = updatedData.lockoutEnd ?? undefined; // undefined: giữ nguyên, Date/null: cập nhật
 
         // 4. Validate dữ liệu update
-        // **LƯU Ý:** Tương tự như Create, chỉ cần truyền data đã được chuẩn bị.
-        // Cần có logic validate riêng cho Update DTO (ví dụ: password không cần thiết).
+        // **LƯU Ý:** Bạn cần một Validator chuyên dụng cho Update,
+        // nơi các trường không bắt buộc (như password, email nếu bạn không cho sửa) không bị lỗi.
+        // Tôi giả định Validator.validateUser có thể xử lý DTO Partial.
         const errors = await Validator.validateUser(updatedData);
         if (errors.length > 0) {
             return {user: null, errors};
         }
 
         // 5. Update trong repo
-        const user = await this.repo.update(Number(id), updatedData);
+        // Lọc các trường là `undefined` trước khi gửi đi để tránh xung đột với Prisma.
+        // Nếu bạn đang dùng `updatedData` (là UserUpdateDto), việc lọc này thường được xử lý ở Repo/Prisma.
+        // Nhưng để an toàn, ta có thể lọc các trường là undefined nếu DTO/Repo không xử lý tốt.
+
+        const finalPayload = Object.fromEntries(
+            Object.entries(updatedData).filter(([, value]) => value !== undefined)
+        ) as UserUpdateDto;
+
+        const user = await this.repo.update(Number(id), finalPayload);
 
         return {user, errors: []};
     }

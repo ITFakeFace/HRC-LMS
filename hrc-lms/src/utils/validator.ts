@@ -2,6 +2,9 @@ import {UserDto} from "@/dtos/user/UserDto";
 import {prisma} from "@/lib/prisma";
 import {RoleDto} from "@/dtos/role/RoleDto";
 import {UserCreateDto} from "@/dtos/user/UserCreateDto";
+import {UserRoleCreateDto} from "@/dtos/user-role/UserRoleCreateDto";
+import {RoleCreateDto} from "@/dtos/role/RoleCreateDto";
+import {UserUpdateDto} from "@/dtos/user/UserUpdateDto";
 
 export interface ValidationError {
     key: string;
@@ -14,7 +17,7 @@ export class Validator {
      * @param data UserCreateDto
      * @returns Mảng lỗi (rỗng nếu hợp lệ)
      */
-    static async validateUser(data: UserCreateDto): Promise<ValidationError[]> {
+    static async validateUser(data: UserCreateDto | UserUpdateDto): Promise<ValidationError[]> {
         const errors: ValidationError[] = [];
         const existListCondition: any[] = []; // Điều kiện cho mệnh đề OR trong Prisma
 
@@ -85,10 +88,25 @@ export class Validator {
         return errors;
     }
 
-    static async validateRole(role: RoleDto) {
+    // Validator hiện chấp nhận BaseRoleData hoặc DTO đầy đủ
+    static async validateRole(data: RoleValidationDto | RoleCreateDto | any) {
         const errors = [];
-        if (!role.fullname || role.fullname == "") errors.push({key: "fullname", message: "Fullname is required"});
-        if (!role.shortname || role.shortname == "") errors.push({key: "shortname", message: "Shortname is required"});
+
+        // 1. Kiểm tra trường bắt buộc và định dạng cơ bản
+        if (!data.fullname || data.fullname.trim() === "") {
+            errors.push({key: "fullname", message: "Tên đầy đủ không được để trống."});
+        } else if (data.fullname.length > 50) {
+            errors.push({key: "fullname", message: "Tên đầy đủ không được vượt quá 50 ký tự."});
+        }
+
+        if (!data.shortname || data.shortname.trim() === "") {
+            errors.push({key: "shortname", message: "Tên viết tắt không được để trống."});
+        } else if (data.shortname.length > 15) {
+            errors.push({key: "shortname", message: "Tên viết tắt không được vượt quá 15 ký tự."});
+        } else if (!/^[A-Z0-9_]+$/.test(data.shortname)) {
+            errors.push({key: "shortname", message: "Tên viết tắt chỉ chấp nhận chữ hoa, số và dấu gạch dưới."});
+        }
+
         return errors;
     }
 

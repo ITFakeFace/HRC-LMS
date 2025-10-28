@@ -2,6 +2,8 @@ import {NextRequest, NextResponse} from "next/server";
 import {UserService} from "@/services/UserService";
 import {ResponseModel} from "@/models/ResponseModel";
 import {authorizeRequest} from "@/lib/authorize";
+import {RoleConnectDto} from "@/dtos/user/UserCreateDto";
+import {UserUpdateDto} from "@/dtos/user/UserUpdateDto";
 
 const service = new UserService();
 
@@ -53,20 +55,109 @@ const getUserById = async (
 // -----------------------------
 // PUT: Cập nhật user theo id
 // -----------------------------
+// Hàm tiện ích để lấy giá trị string từ FormData, trả về null nếu không có
+const getStr = (form: FormData, key: string) => (form.get(key) as string | null);
+
+// Hàm tiện ích để xử lý các trường tùy chọn DateTime?
+const getOptionalDate = (form: FormData, key: string): Date | null => {
+    const raw = getStr(form, key);
+    if (!raw || raw.toLowerCase() === 'null') return null;
+    const date = new Date(raw);
+    return isNaN(date.getTime()) ? null : date;
+};
+
+
+// -----------------------------
+// PUT: Cập nhật user theo ID
+// -----------------------------
 const updateUser = async (
     req: NextRequest,
     userId: string,
     params: { id: string }
 ) => {
+    const {id} = await params;
+    console.log("\n\nUpdate User\n\n");
     try {
-        const body = await req.json();
+        // 1. Lấy dữ liệu FormData (multipart/form-data)
+        const form = await req.formData();
 
-        const {user, errors} = await service.updateUser(params.id, body);
+        // 2. Xử lý Avatar (Buffer)
+        let avatarBuffer: Buffer | null | undefined = undefined; // undefined: không cập nhật; null: xóa avatar cũ
+        const avatarFile = form.get("avatar");
 
-        if (errors.length > 0) {
+        if (avatarFile && avatarFile instanceof File && avatarFile.size > 0) {
+            // Có file mới được tải lên
+            const bytes = await avatarFile.arrayBuffer();
+            avatarBuffer = Buffer.from(bytes);
+        } else if (avatarFile === 'null') {
+            // Giả sử client gửi "null" string nếu muốn xóa avatar cũ
+            avatarBuffer = null;
+        }
+        // Nếu avatarFile là null/undefined hoặc file rỗng, avatarBuffer là undefined (không cập nhật)
+
+        // 3. Xử lý Roles (Chuyển chuỗi JSON sang array object)
+        // Lưu ý: MultiSelect của PrimeReact gửi mảng số (Role IDs) sang backend,
+        // nếu bạn đang sử dụng FormData và không xử lý đặc biệt, nó sẽ gửi nhiều cặp key=value.
+        // Tuy nhiên, dựa trên code tạo (createUser) của bạn, tôi giữ logic xử lý chuỗi JSON:
+        let roles: RoleConnectDto[] | undefined = undefined; // undefined: không cập nhật
+        const rawRolesString = getStr(form, "roles");
+
+        if (rawRolesString) {
+            try {
+                const receivedRoles = JSON.parse(rawRolesString);
+
+                if (Array.isArray(receivedRoles)) {
+                    roles = receivedRoles
+                        .filter(r => r && r.id !== undefined)
+                        .map(r => ({id: Number(r.id)}));
+                } else {
+                    // Nếu là mảng ID: [1, 2, 3]
+                    roles = receivedRoles.map(id => ({id: Number(id)}));
+                }
+
+            } catch (e) {
+                console.warn("Lỗi phân tích cú pháp Roles, bỏ qua cập nhật Roles:", e);
+                roles = undefined;
+            }
+        }
+
+        // 4. Xây dựng Payload (UserUpdateDto)
+        const body: UserUpdateDto = {
+            // Các trường bắt buộc trong UserCreateDto sẽ là tùy chọn trong UserUpdateDto
+            pID: getStr(form, "pID") as string,
+            username: getStr(form, "username") as string,
+            phone: getStr(form, "phone"),
+            email: getStr(form, "email") as string,
+
+            // Password chỉ cập nhật nếu có giá trị
+            password: getStr(form, "password") || undefined,
+
+            fullname: getStr(form, "fullname") as string,
+
+            // Chuyển đổi từ string "true"/"false" sang boolean
+            gender: getStr(form, "gender") ? getStr(form, "gender") === "true" : undefined,
+            isEmailVerified: getStr(form, "isEmailVerified") ? getStr(form, "isEmailVerified") === "true" : undefined,
+
+            // Chuyển đổi từ string sang Date
+            dob: getStr(form, "dob") ? new Date(getStr(form, "dob") as string) : undefined,
+
+            // Xử lý các trường optional
+            lockoutEnd: getOptionalDate(form, "lockoutEnd"),
+            avatar: avatarBuffer, // undefined, null hoặc Buffer
+
+            // Gán roles
+            roles: roles // undefined hoặc RoleConnectDto[]
+        };
+
+        // Loại bỏ các trường undefined để Prisma/Service không cố gắng cập nhật chúng
+        Object.keys(body).forEach(key => body[key] === undefined && delete body[key]);
+
+        const {user, errors} = await service.updateUser(id, body);
+
+        if (errors && errors.length > 0) {
             return NextResponse.json(
                 ResponseModel.error({
-                    message: "Có lỗi xảy ra",
+                    message: "Cập nhật thất bại do lỗi validation",
                     statusCode: 400,
                     data: errors,
                 }),
@@ -74,15 +165,18 @@ const updateUser = async (
             );
         }
 
+        // Loại bỏ trường avatar (Buffer) và password khỏi response nếu có
+        const {avatar, password, ...userWithoutAvatar} = user;
+
         return NextResponse.json(
             ResponseModel.success({
                 message: "Cập nhật thành công!",
-                data: user,
+                data: userWithoutAvatar,
             }),
             {status: 200}
         );
     } catch (err) {
-        console.error("PUT /users/[id] error:", err);
+        console.error(`PUT /users/${id} error:`, err);
         return NextResponse.json(
             ResponseModel.error({
                 message: "Internal Server Error",

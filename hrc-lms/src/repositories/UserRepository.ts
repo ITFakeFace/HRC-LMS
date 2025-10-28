@@ -69,10 +69,68 @@ export class UserRepository {
         });
     }
 
+    // Giả định UserUpdateDto có dạng { ..., roles?: { id: number }[] }
+
     async update(id: number, data: UserUpdateDto) {
-        return prisma.user.update({
-            where: {id},
-            data,
+        // 1. Tách roles ra khỏi data. Roles là optional, có thể là undefined
+        const {roles, ...userData} = data;
+
+        // Bắt buộc dùng transaction để đảm bảo toàn vẹn dữ liệu
+        return prisma.$transaction(async (tx) => {
+
+            // 2. Chuẩn bị Payload cho user.update
+            const updatePayload: any = {
+                ...userData,
+
+                // Bổ sung updatedAt (Nên set tự động)
+                updatedAt: new Date(),
+            };
+
+            // 3. Xử lý các trường Tùy chọn (Nullable Fields)
+            // Chỉ ghi đè nếu giá trị được cung cấp (không phải undefined).
+            // Nếu giá trị là NULL, chúng ta cần đảm bảo nó được gửi đi.
+
+            if (Object.prototype.hasOwnProperty.call(userData, 'phone')) {
+                updatePayload.phone = userData.phone ?? null;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(userData, 'lockoutEnd')) {
+                updatePayload.lockoutEnd = userData.lockoutEnd ?? null;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(userData, 'avatar')) {
+                updatePayload.avatar = userData.avatar ?? null;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(userData, 'isEmailVerified')) {
+                updatePayload.isEmailVerified = userData.isEmailVerified ?? false;
+            }
+
+            // 4. Xử lý Roles (Nếu có mảng roles mới được cung cấp)
+            if (roles) {
+                // Cú pháp `set` của Prisma để cập nhật quan hệ many-to-many:
+                // Nó sẽ xóa tất cả các UserRole cũ và tạo các UserRole mới.
+                updatePayload.userRoles = {
+                    set: roles.map(role => ({
+                        role: {
+                            connect: {id: role.id} // Giả sử roles là {id: number}[]
+                        }
+                    }))
+                };
+            }
+
+
+            // 5. Thực hiện Update
+            const updatedUser = await tx.user.update({
+                where: {id},
+                data: updatePayload,
+                // Include để trả về user kèm thông tin roles
+                include: {
+                    userRoles: {include: {role: true}}
+                }
+            });
+
+            return updatedUser;
         });
     }
 

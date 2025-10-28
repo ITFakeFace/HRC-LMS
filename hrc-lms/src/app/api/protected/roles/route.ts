@@ -2,6 +2,7 @@ import {NextRequest, NextResponse} from "next/server";
 import {RoleService} from "@/services/RoleService";
 import {ResponseModel} from "@/models/ResponseModel";
 import {authorizeRequest} from "@/lib/authorize";
+import {RoleCreateDto} from "@/dtos/role/RoleCreateDto";
 
 const service = new RoleService();
 
@@ -33,17 +34,23 @@ async function getRoles(req: NextRequest) {
 }
 
 // -----------------------------
-// POST: Tạo role mới
+// POST: Tạo role mới (Logic đã đúng với data client gửi)
 // -----------------------------
 async function createRole(req: NextRequest) {
     try {
-        const body = await req.json();
+        const body: RoleCreateDto = await req.json(); // Ép kiểu cho an toàn
+
+        // Dữ liệu từ client gửi đã bao gồm fullname, shortname, parentRoles, permissions
         const {role, errors} = await service.createRole(body);
 
         if (errors.length > 0) {
+            // Lỗi xác thực, trùng lặp, hoặc lỗi quan hệ (P2003)
+            // Lấy thông báo lỗi đầu tiên hoặc tổng hợp
+            const errorMessage = errors.map(e => e.message).join(', ') || "Lỗi dữ liệu không hợp lệ";
+
             return NextResponse.json(
                 ResponseModel.error({
-                    message: "Có lỗi xảy ra",
+                    message: errorMessage,
                     statusCode: 400,
                     data: errors,
                 }),
@@ -53,7 +60,7 @@ async function createRole(req: NextRequest) {
 
         return NextResponse.json(
             ResponseModel.success({
-                message: "Thành công!",
+                message: "Tạo role thành công!",
                 data: role,
             }),
             {status: 201}
@@ -62,9 +69,9 @@ async function createRole(req: NextRequest) {
         console.error("POST /roles error:", err);
         return NextResponse.json(
             ResponseModel.error({
-                message: "Internal Server Error",
+                message: "Lỗi Server nội bộ",
                 statusCode: 500,
-                data: err,
+                data: null,
             }),
             {status: 500}
         );
