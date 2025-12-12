@@ -1,0 +1,54 @@
+[
+    {
+        "question": "Bạn khỏe không?",
+        "answer": "Tôi khỏe, cảm ơn bạn. Còn bạn thì sao?"
+    },
+    {
+        "question": "Thời tiết hôm nay thế nào?",
+        "answer": "Thời tiết hôm nay rất đẹp."
+    },
+    {
+        "question": "Hôm nay là thứ mấy?",
+        "answer": "Hôm nay là thứ hai, ngày 13 tháng 10 năm 2025."
+    },
+    {
+        "question": "Giá tiền của sản phẩm này là bao nhiêu?",
+        "answer": "Giá sản phẩm là 500.000 đồng."
+    },
+    {
+        "question": "Tôi có thể liên hệ với bạn bằng cách nào?",
+        "answer": "Bạn có thể gọi điện đến số 090xxxxxxx."
+    },
+    {
+        "question": "Bạn có thể giúp tôi với việc gì?",
+        "answer": "Tôi là một trợ lý ảo. Tôi có thể giúp bạn tìm thông tin và trả lời các câu hỏi."
+    },
+    {
+        "question": "Chào bạn!",
+        "answer": "Chào bạn, tôi có thể giúp gì cho bạn?"
+    },
+    {
+        "question": "Thủ đô của Việt Nam là gì?",
+        "answer": "Thủ đô của Việt Nam là Hà Nội."
+    },
+    {
+        "question": "Mấy giờ rồi?",
+        "answer": "Bây giờ là 8 giờ tối."
+    },
+    {
+        "question": "Lớp học lập trình có những khóa học nào?",
+        "answer": "Lớp học của chúng tôi có các khóa học về Lập trình Python, JavaScript, Java và Khoa học dữ liệu."
+    },
+    {
+        "question": "Học phí khóa Python là bao nhiêu?",
+        "answer": "Học phí khóa lập trình Python là 3.000.000 VNĐ."
+    },
+    {
+        "question": "Khi nào thì khóa học kế tiếp bắt đầu?",
+        "answer": "Khóa học tiếp theo sẽ khai giảng vào ngày 1 tháng 11 năm 2025."
+    },
+    {
+        "question": "Thời gian học của khóa JavaScript?",
+        "answer": "Khóa JavaScript học vào các buổi tối thứ 2, 4, 6 từ 19:00 đến 21:00."
+    }
+]

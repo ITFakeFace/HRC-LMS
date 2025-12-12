@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:DoThanhHung66%404@localhost:3306/KLTN_HRC_JS"
+}
+
+// =========================================================================
+//                                CORE MODELS
+// =========================================================================
+
+model User {
+  id                Int            @id @default(autoincrement())
+  pID               String         @unique @db.VarChar(12)
+  username          String         @unique @db.VarChar(50)
+  phone             String?        @unique @db.VarChar(10)
+  email             String         @unique @db.VarChar(100)
+  password          String         @db.VarChar(255)
+  avatar            String?
+  fullname          String         @db.VarChar(100)
+  gender            Boolean
+  dob               DateTime
+  lockoutEnd        DateTime?
+  isEmailVerified   Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Mối quan hệ N:N với Role (Bảng liên kết ngầm định: UserToRole)
+  roles             Role[]         @relation("UserRoles")
+
+  refreshTokens     RefreshToken[]
+
+  // Mối quan hệ 1:N với Course
+  createdCourses    Course[]       @relation("CreatedCourses")
+  editedCourses     Course[]       @relation("EditedCourses")
+  
+  @@map("Users") // Đặt tên bảng MySQL là Users
+}
+
+model Role {
+  id          Int            @id @default(autoincrement())
+  fullname    String         @unique @db.VarChar(50)
+  shortname   String         @unique @db.VarChar(15)
+
+  // Mối quan hệ N:N với User
+  users       User[]         @relation("UserRoles")
+
+  // Quan hệ phân cấp Tự tham chiếu N:N (Sử dụng bảng liên kết tường minh RoleHierarchy)
+  parentRoles RoleHierarchy[] @relation("ParentOf") // Vai trò: Là Role cha
+  childRoles  RoleHierarchy[] @relation("ChildOf")  // Vai trò: Là Role con
+
+  // Mối quan hệ N:N với Permission (Bảng liên kết ngầm định: RoleToPermission)
+  permissions Permission[]   @relation("RolePermissions")
+
+  @@map("Roles") // Đặt tên bảng MySQL là Roles
+}
+
+model RoleHierarchy {
+  parentId Int
+  childId  Int
+
+  // Đổi tên relation để phù hợp với ngữ cảnh Parent/Child
+  parent Role @relation("ParentOf", fields: [parentId], references: [id], onDelete: Cascade)
+  child  Role @relation("ChildOf", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, childId])
+  @@map("RoleHierarchies") // Đặt tên bảng liên kết là RoleHierarchies
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.VarChar(255)
+
+  // Mối quan hệ N:N với Role
+  roles       Role[]   @relation("RolePermissions")
+
+  @@map("Permissions") // Đặt tên bảng MySQL là Permissions
+}
+
+// =========================================================================
+//                             OTHER MODELS
+// =========================================================================
+
+model RefreshToken {
+  id                Int      @id @default(autoincrement())
+  jti               String   @unique 
+  userId            Int
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isRevoked         Boolean  @default(false)
+  replacedByTokenId String?  
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime
+  ipAddress         String?  
+  userAgent         String?  
+
+  @@index([userId])
+  @@map("RefreshTokens")
+}
+
+model Course {
+  id          Int      @id @default(autoincrement())
+  
+  // --- NHÓM ĐỊNH DANH & TÌM KIẾM (Cột cứng - Indexed) ---
+  name        String   @db.VarChar(255)
+  code        String   @unique @db.VarChar(50)  // Ví dụ: "HRC-RS01" -> Dùng để tìm kiếm chính xác
+  slug        String   @unique @db.VarChar(255) // Ví dụ: "thu-hut-va-tuyen-chon-nhan-su" -> Dùng cho URL
+  status      Int      @default(0)              // 0: Draft, 1: Published
+  
+  description String?  @db.Text                 // Dùng Text thay vì VarChar để lưu được nhiều hơn
+  duration    String?  @db.VarChar(255)         // Lưu chuỗi: "10 buổi, mỗi buổi 2.5 giờ"
+  coverImage  Bytes?                            // Lưu ảnh cover (Base64 -> Buffer)
+
+  // --- NHÓM JSON (Lưu trữ linh hoạt - Flexible) ---
+  
+  // Mảng String: ["Mục tiêu 1", "Mục tiêu 2"...]
+  objectives  Json     @map("objectives")      // Tên cũ: courseObjectives
+  
+  // Mảng String: ["Người học A", "Người học B"...]
+  audiences   Json?    @map("audiences")       // Tên cũ: targetLearners
+  
+  // Mảng String: ["Yêu cầu 1"...]
+  requirements Json?
+  
+  // Mảng String: ["Thứ 7...", "Thứ 2..."]
+  schedule     Json?
+  
+  // Mảng String: ["Cơ sở 1", "Cơ sở 2"]
+  locations    Json?
+  
+  // Object: { "part_exam": "...", "final_exam": "..." }
+  assessment   Json?    @map("assessment")     // Tên cũ: assessmentMethods
+  
+  // Object: { "mandatory": "...", "references": "..." }
+  materials    Json?
+  
+  // Mảng Object (QUAN TRỌNG: Cần chuẩn hóa từ Object key động sang Mảng)
+  // [ { "title": "Buổi 1", "topics": ["A", "B"] }, ... ]
+  contents     Json?
+
+  // Mảng String: ["Giảng viên A", "Giảng viên B"] 
+  // (Nếu sau này cần quản lý giảng viên chặt chẽ thì tách bảng riêng, còn hiện tại lưu tên thì dùng JSON)
+  instructors  Json?
+
+  // --- QUAN HỆ & METADATA ---
+  creatorId    Int
+  lastEditor   Int?     // Có thể null nếu chưa ai sửa
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  creator      User     @relation("CreatedCourses", fields: [creatorId], references: [id])
+  editor       User?    @relation("EditedCourses", fields: [lastEditor], references: [id])
+
+  // Mối quan hệ N:N với Category
+  categories   Category[] @relation("CourseCategories")
+
+  @@map("Courses")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(255)
+  description String?  @db.VarChar(255)
+
+  // Mối quan hệ N:N với Course
+  courses     Course[] @relation("CourseCategories")
+
+  @@map("Categories")
+}
