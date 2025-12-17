@@ -42,6 +42,8 @@ model User {
   createdCourses    Course[]       @relation("CreatedCourses")
   editedCourses     Course[]       @relation("EditedCourses")
   
+  sentMessages ChatContent[]
+
   @@map("Users") // Đặt tên bảng MySQL là Users
 }
 
@@ -175,4 +177,39 @@ model Category {
   courses     Course[] @relation("CourseCategories")
 
   @@map("Categories")
+}
+
+// 2. Bảng ClientSession (Phiên chat của khách)
+model ClientSession {
+  id        Int       @id @default(autoincrement())
+  AIEnable  Boolean   @default(true) // Mặc định bật AI
+  isEnded   Boolean   @default(false) // Mặc định chưa kết thúc
+  createdAt DateTime  @default(now())
+
+  // Mối quan hệ 1:N với ChatContent (1 phiên có nhiều tin nhắn)
+  messages ChatContent[]
+
+  @@map("ClientSessions")
+}
+
+// 3. Bảng ChatContent (Nội dung chat)
+model ChatContent {
+  id        Int      @id @default(autoincrement())
+  message   String   @db.VarChar(255)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // --- QUAN HỆ 1: PHIÊN CHAT (BẮT BUỘC) ---
+  // Tin nhắn này thuộc về phiên chat nào?
+  sessionId Int
+  session   ClientSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // --- QUAN HỆ 2: NGƯỜI GỬI (LÀ USER/AI) ---
+  // Ai gửi tin nhắn này? (Có thể Null)
+  // - Nếu senderId = NULL  => Người gửi là KHÁCH (Guest/ClientSession owner)
+  // - Nếu senderId = VALUE => Người gửi là USER (Có thể là AI hoặc Agent)
+  senderId Int?
+  sender   User? @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@map("ChatContents")
 }

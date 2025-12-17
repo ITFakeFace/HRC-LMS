@@ -108,6 +108,28 @@ CREATE TABLE `Categories` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `ClientSessions` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `AIEnable` BOOLEAN NOT NULL DEFAULT true,
+    `isEnded` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ChatContents` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `message` VARCHAR(255) NOT NULL,
+    `isRead` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `sessionId` INTEGER NOT NULL,
+    `senderId` INTEGER NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `_UserRoles` (
     `A` INTEGER NOT NULL,
     `B` INTEGER NOT NULL,
@@ -148,6 +170,12 @@ ALTER TABLE `Courses` ADD CONSTRAINT `Courses_creatorId_fkey` FOREIGN KEY (`crea
 
 -- AddForeignKey
 ALTER TABLE `Courses` ADD CONSTRAINT `Courses_lastEditor_fkey` FOREIGN KEY (`lastEditor`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ChatContents` ADD CONSTRAINT `ChatContents_sessionId_fkey` FOREIGN KEY (`sessionId`) REFERENCES `ClientSessions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ChatContents` ADD CONSTRAINT `ChatContents_senderId_fkey` FOREIGN KEY (`senderId`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_UserRoles` ADD CONSTRAINT `_UserRoles_A_fkey` FOREIGN KEY (`A`) REFERENCES `Roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
