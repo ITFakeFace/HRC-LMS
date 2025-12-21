@@ -4,13 +4,15 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config'; // 🚨 Thêm import này
+import { ConfigModule, ConfigService } from '@nestjs/config'; // 🚨 Thêm import này
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CoursesModule } from './courses/courses.module';
+import { EmailModule } from './email/email.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 
 @Module({
@@ -30,6 +32,25 @@ import { CoursesModule } from './courses/courses.module';
     RolesModule,
     CategoriesModule,
     CoursesModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          port: config.get<number>('MAIL_PORT'),
+          secure: false, // true cho cổng 465, false cho các cổng khác
+          auth: {
+            user: config.get('MAIL_USER'),
+            pass: config.get('MAIL_PASS'),
+          },
+        },
+        defaults: {
+          from: config.get('MAIL_FROM'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -50,7 +50,7 @@ export class AuthService {
     // 1. Tạo Access Token (Ngắn hạn)
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET || 'YOUR_DEFAULT_ACCESS_SECRET',
-      expiresIn: '15m',
+      expiresIn: '1d',
     });
 
     // 2. Tạo Refresh Token (Dài hạn)
