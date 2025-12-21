@@ -130,6 +130,59 @@ CREATE TABLE `ChatContents` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `Classes` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(50) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `startDate` DATETIME(3) NOT NULL,
+    `endDate` DATETIME(3) NULL,
+    `status` ENUM('ACTIVE', 'FINISHED', 'CANCELED') NOT NULL DEFAULT 'ACTIVE',
+    `courseId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Classes_code_key`(`code`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Enrollments` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `studentId` INTEGER NOT NULL,
+    `classId` INTEGER NOT NULL,
+    `joinedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `status` ENUM('LEARNING', 'DROPPED', 'PASSED', 'FAILED') NOT NULL DEFAULT 'LEARNING',
+
+    UNIQUE INDEX `Enrollments_studentId_classId_key`(`studentId`, `classId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AttendanceSessions` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `classId` INTEGER NOT NULL,
+    `openBy` INTEGER NOT NULL,
+    `openAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `closeAt` DATETIME(3) NULL,
+    `code` VARCHAR(10) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AttendanceRecords` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `sessionId` INTEGER NOT NULL,
+    `stdId` INTEGER NOT NULL,
+    `status` ENUM('PRESENT', 'ABSENT', 'LATE', 'EXCUSED') NOT NULL DEFAULT 'ABSENT',
+    `note` VARCHAR(255) NULL,
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `AttendanceRecords_sessionId_stdId_key`(`sessionId`, `stdId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `_UserRoles` (
     `A` INTEGER NOT NULL,
     `B` INTEGER NOT NULL,
@@ -176,6 +229,27 @@ ALTER TABLE `ChatContents` ADD CONSTRAINT `ChatContents_sessionId_fkey` FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE `ChatContents` ADD CONSTRAINT `ChatContents_senderId_fkey` FOREIGN KEY (`senderId`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Classes` ADD CONSTRAINT `Classes_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `Courses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Enrollments` ADD CONSTRAINT `Enrollments_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Enrollments` ADD CONSTRAINT `Enrollments_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttendanceSessions` ADD CONSTRAINT `AttendanceSessions_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Classes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttendanceSessions` ADD CONSTRAINT `AttendanceSessions_openBy_fkey` FOREIGN KEY (`openBy`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttendanceRecords` ADD CONSTRAINT `AttendanceRecords_sessionId_fkey` FOREIGN KEY (`sessionId`) REFERENCES `AttendanceSessions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttendanceRecords` ADD CONSTRAINT `AttendanceRecords_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_UserRoles` ADD CONSTRAINT `_UserRoles_A_fkey` FOREIGN KEY (`A`) REFERENCES `Roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

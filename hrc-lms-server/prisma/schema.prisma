@@ -44,6 +44,17 @@ model User {
   
   sentMessages ChatContent[]
 
+  // --- QUAN HỆ MỚI (CLASS & ATTENDANCE) ---
+  
+  // 1. User là Học viên tham gia các lớp
+  enrollments     Enrollment[]
+
+  // 2. User là Giáo viên mở form điểm danh
+  openedSessions  AttendanceSession[] @relation("SessionOpener")
+
+  // 3. User là Học viên được điểm danh (để truy vấn lịch sử điểm danh của user này)
+  attendanceRecords AttendanceRecord[]
+
   @@map("Users") // Đặt tên bảng MySQL là Users
 }
 
@@ -161,9 +172,12 @@ model Course {
 
   creator      User     @relation("CreatedCourses", fields: [creatorId], references: [id])
   editor       User?    @relation("EditedCourses", fields: [lastEditor], references: [id])
-
   // Mối quan hệ N:N với Category
   categories   Category[] @relation("CourseCategories")
+  // --- QUAN HỆ MỚI ---
+  // Một khóa học (template) có nhiều lớp học (instances)
+  classes     Class[]
+  
 
   @@map("Courses")
 }
@@ -212,4 +226,123 @@ model ChatContent {
   sender   User? @relation(fields: [senderId], references: [id], onDelete: SetNull)
 
   @@map("ChatContents")
+}
+
+// MODEL MỚI: Lớp học cụ thể
+model Class {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(50) // Mã lớp, VD: "HRC-RS01-K19"
+  name        String   @db.VarChar(255)        // Tên lớp
+  startDate   DateTime
+  endDate     DateTime?
+  status      ClassStatus @default(ACTIVE)     // Enum trạng thái lớp
+
+  // Quan hệ với Course
+  courseId    Int
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  // Quan hệ: Một lớp có nhiều học viên đăng ký
+  enrollments Enrollment[]
+
+  // Quan hệ: Một lớp có nhiều buổi điểm danh
+  attendanceSessions AttendanceSession[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("Classes")
+}
+
+// MODEL MỚI: Đăng ký học (Bảng trung gian User - Class)
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  classId   Int
+  joinedAt  DateTime @default(now())
+  status    EnrollmentStatus @default(LEARNING) // Đang học, Bảo lưu, Đã xong...
+
+  student   User     @relation(fields: [studentId], references: [id])
+  class     Class    @relation(fields: [classId], references: [id])
+
+  // Ràng buộc: Một User chỉ đăng ký 1 Class một lần
+  @@unique([studentId, classId]) 
+  @@map("Enrollments")
+}
+
+// =========================================================================
+//                              ATTENDANCE MODELS
+// =========================================================================
+
+// MODEL MỚI: Phiên điểm danh (Cái Form giáo viên mở)
+model AttendanceSession {
+  id        Int      @id @default(autoincrement())
+  
+  // Thuộc về lớp nào?
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id])
+
+  // Ai mở form? (Teacher)
+  openBy    Int
+  opener    User     @relation("SessionOpener", fields: [openBy], references: [id])
+
+  // Thời gian
+  openAt    DateTime @default(now())
+  closeAt   DateTime? // Nếu null nghĩa là đang mở, chưa đóng
+
+  // Mã phiên (Optional): Dùng nếu muốn sinh code cho học sinh tự nhập
+  code      String?  @db.VarChar(10) 
+
+  // Danh sách các bản ghi điểm danh trong phiên này
+  records   AttendanceRecord[]
+
+  @@map("AttendanceSessions")
+}
+
+// MODEL MỚI: Bản ghi điểm danh chi tiết (Cho từng học sinh)
+model AttendanceRecord {
+  id        Int      @id @default(autoincrement())
+
+  // Thuộc về phiên điểm danh nào?
+  sessionId Int
+  session   AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Điểm danh cho học sinh nào?
+  stdId     Int
+  student   User     @relation(fields: [stdId], references: [id])
+
+  // Trạng thái: Có mặt, Vắng, Muộn...
+  status    AttendanceStatus @default(ABSENT) 
+  
+  // Ghi chú (VD: Lý do vắng)
+  note      String?  @db.VarChar(255)
+  
+  updatedAt DateTime @updatedAt // Thời điểm cập nhật trạng thái
+
+  // Ràng buộc: Trong 1 phiên, 1 học sinh chỉ có 1 bản ghi
+  @@unique([sessionId, stdId])
+  @@map("AttendanceRecords")
+}
+
+// =========================================================================
+//                                ENUMS
+// =========================================================================
+
+enum ClassStatus {
+  ACTIVE
+  FINISHED
+  CANCELED
+}
+
+enum EnrollmentStatus {
+  LEARNING
+  DROPPED
+  PASSED
+  FAILED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED // Có phép
 }
