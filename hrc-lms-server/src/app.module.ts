@@ -13,6 +13,10 @@ import { CategoriesModule } from './categories/categories.module';
 import { CoursesModule } from './courses/courses.module';
 import { EmailModule } from './email/email.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ClassesModule } from './class/classes.module';
+import { EnrollmentsModule } from './enrollment/enrollments.module';
+import { SessionsModule } from './class-session/class-sessions.module';
+import { AttendanceModule } from './attendance/attendance.module';
 
 
 @Module({
@@ -51,6 +55,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
       inject: [ConfigService],
     }),
     EmailModule,
+    ClassesModule,
+    EnrollmentsModule,
+    SessionsModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

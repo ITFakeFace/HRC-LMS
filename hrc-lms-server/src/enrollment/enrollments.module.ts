@@ -8,7 +8,7 @@ import { EnrollmentRepository } from './enrollment.repository';
   imports: [PrismaModule],
   controllers: [EnrollmentsController],
   providers: [EnrollmentsService, EnrollmentRepository],
-  // QUAN TRỌNG: Phải export Repository để AttendanceModule dùng được
+  // QUAN TRỌNG: Phải export Repository để SessionsModule dùng được
   exports: [EnrollmentRepository, EnrollmentsService], 
 })
 export class EnrollmentsModule {}

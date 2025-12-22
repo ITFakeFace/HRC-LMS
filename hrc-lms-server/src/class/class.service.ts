@@ -14,13 +14,9 @@ export class ClassesService {
   async create(createClassDto: CreateClassDto): Promise<ResponseClassDto> {
     const res = new ResponseClassDto();
 
-    // 1. Validate: Kiểm tra trùng mã lớp (Code)
-    // Lưu ý: Cần đảm bảo ClassRepository có hàm tìm theo Code hoặc dùng try/catch P2002
-    // Ở đây tôi dùng try/catch để bao quát trường hợp Unique Constraint
-    
-    // 2. Thực thi tạo mới
+    // 1. Thực thi tạo mới (Repository đã bao gồm logic sinh lịch)
     try {
-      const newClass = await this.classRepository.create(createClassDto);
+      const newClass = await this.classRepository.createWithSchedule(createClassDto);
       res.classData = this.mapToDto(newClass);
     } catch (error) {
       console.error('Lỗi khi tạo Class:', error);
@@ -28,7 +24,7 @@ export class ClassesService {
       if (error.code === 'P2002' && error.meta?.target?.includes('code')) {
         res.pushError({
           key: 'code',
-          value: 'Mã lớp đã tồn tại.',
+          value: `Mã lớp '${createClassDto.code}' đã tồn tại.`,
         });
       } else {
         res.pushError({
@@ -42,9 +38,9 @@ export class ClassesService {
   }
 
   // === 2. FIND ALL ===
-  async findAll(courseId?: number): Promise<ClassDto[]> {
-    const classes = await this.classRepository.findAll(courseId);
-    return classes.map(cls => this.mapToDto(cls));
+  async findAll(courseId?: number, lecturerId?: number): Promise<ClassDto[]> {
+    const classes = await this.classRepository.findAll(courseId, lecturerId);
+    return classes.map((cls) => this.mapToDto(cls));
   }
 
   // === 3. FIND ONE ===
@@ -68,32 +64,22 @@ export class ClassesService {
   async update(id: number, updateClassDto: UpdateClassDto): Promise<ResponseClassDto> {
     const res = new ResponseClassDto();
 
-    // 1. Kiểm tra tồn tại
+    // Kiểm tra tồn tại
     const existingClass = await this.classRepository.findById(id);
     if (!existingClass) {
-      res.pushError({
-        key: 'id',
-        value: `Lớp học với ID ${id} không tồn tại.`,
-      });
+      res.pushError({ key: 'id', value: `Lớp học với ID ${id} không tồn tại.` });
       return res;
     }
 
-    // 2. Thực thi update
     try {
       const updatedClass = await this.classRepository.update(id, updateClassDto);
       res.classData = this.mapToDto(updatedClass);
     } catch (error) {
       console.error('Lỗi khi cập nhật Class:', error);
-      if (error.code === 'P2002' && error.meta?.target?.includes('code')) {
-        res.pushError({
-          key: 'code',
-          value: 'Mã lớp mới bị trùng lặp.',
-        });
+      if (error.code === 'P2002') {
+        res.pushError({ key: 'code', value: 'Mã lớp mới bị trùng lặp.' });
       } else {
-        res.pushError({
-          key: 'global',
-          value: 'Lỗi không mong muốn trong quá trình cập nhật lớp học.',
-        });
+        res.pushError({ key: 'global', value: 'Lỗi hệ thống khi cập nhật lớp.' });
       }
     }
 
@@ -104,17 +90,12 @@ export class ClassesService {
   async remove(id: number): Promise<ResponseClassDto> {
     const res = new ResponseClassDto();
 
-    // 1. Kiểm tra tồn tại
     const existingClass = await this.classRepository.findById(id);
     if (!existingClass) {
-      res.pushError({
-        key: 'id',
-        value: `Lớp học với ID ${id} không tồn tại.`,
-      });
+      res.pushError({ key: 'id', value: `Lớp học với ID ${id} không tồn tại.` });
       return res;
     }
 
-    // 2. Thực thi xóa
     try {
       const deletedClass = await this.classRepository.delete(id);
       res.classData = this.mapToDto(deletedClass);
@@ -122,14 +103,13 @@ export class ClassesService {
       console.error('Lỗi khi xóa Class:', error);
       res.pushError({
         key: 'global',
-        value: 'Không thể xóa lớp học này (có thể do đang có học sinh hoặc dữ liệu liên kết).',
+        value: 'Không thể xóa lớp học này (do ràng buộc dữ liệu).',
       });
     }
 
     return res;
   }
 
-  // === Helper Map ===
   private mapToDto(data: Class): ClassDto {
     return {
       id: data.id,
@@ -137,8 +117,13 @@ export class ClassesService {
       name: data.name,
       startDate: data.startDate,
       endDate: data.endDate,
+      totalSessions: data.totalSessions,
+      shift: data.shift,
+      startTime: data.startTime,
+      endTime: data.endTime,
       status: data.status,
       courseId: data.courseId,
+      lecturerId: data.lecturerId,
     };
   }
 }

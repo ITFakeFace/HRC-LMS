@@ -1,25 +1,59 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Class, ClassStatus, Prisma } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { Prisma, Class, ClassStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ScheduleUtils } from 'src/utils/schedule.utils';
 
 @Injectable()
 export class ClassRepository {
   constructor(private prisma: PrismaService) {}
 
+  // --- CREATE ---
+  
+  // Tạo lớp và tự động sinh ClassSession dựa trên cấu hình (Shift, StartDate...)
+  async createWithSchedule(data: Prisma.ClassUncheckedCreateInput): Promise<Class> {
+    const { startDate, totalSessions, shift, startTime, endTime } = data;
+
+    // 1. Sinh mảng sessions từ Utils
+    const sessionsData = ScheduleUtils.generateSessions(
+      new Date(startDate),
+      totalSessions || 0,
+      shift,
+      startTime,
+      endTime
+    );
+
+    // 2. Insert Lớp + Sessions cùng lúc
+    return this.prisma.class.create({
+      data: {
+        ...data,
+        sessions: {
+          create: sessionsData, 
+        },
+      },
+      include: {
+        sessions: true, // Trả về để kiểm tra
+      },
+    });
+  }
+
   async create(data: Prisma.ClassUncheckedCreateInput): Promise<Class> {
     return this.prisma.class.create({ data });
   }
 
-  async findAll(courseId?: number): Promise<Class[]> {
-    const where: Prisma.ClassWhereInput = courseId ? { courseId } : {};
-    
+  // --- READ ---
+
+  async findAll(courseId?: number, lecturerId?: number): Promise<Class[]> {
+    const where: Prisma.ClassWhereInput = {};
+    if (courseId) where.courseId = courseId;
+    if (lecturerId) where.lecturerId = lecturerId;
+
     return this.prisma.class.findMany({
       where,
+      orderBy: { createdAt: 'desc' },
       include: {
         course: { select: { name: true, code: true } },
         _count: { select: { enrollments: true } },
       },
-      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -28,16 +62,14 @@ export class ClassRepository {
       where: { id },
       include: {
         course: true,
-        enrollments: {
-          include: {
-            student: {
-              select: { id: true, fullname: true, pID: true, email: true },
-            },
-          },
-        },
+        lecturer: { select: { id: true, fullname: true, email: true } },
+        sessions: { orderBy: { sessionNumber: 'asc' } }, // Lấy kèm lịch học
+        _count: { select: { enrollments: true } },
       },
     });
   }
+
+  // --- UPDATE ---
 
   async update(id: number, data: Prisma.ClassUpdateInput): Promise<Class> {
     return this.prisma.class.update({
@@ -53,19 +85,11 @@ export class ClassRepository {
     });
   }
 
+  // --- DELETE ---
+
   async delete(id: number): Promise<Class> {
-    try {
-      return await this.prisma.class.delete({
-        where: { id },
-      });
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
-        throw new NotFoundException(`Class with ID ${id} not found.`);
-      }
-      throw error;
-    }
+    return this.prisma.class.delete({
+      where: { id },
+    });
   }
 }

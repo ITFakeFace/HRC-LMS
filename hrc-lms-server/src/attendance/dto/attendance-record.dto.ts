@@ -6,4 +6,5 @@ export class AttendanceRecordDto {
   stdId: number;
   status: AttendanceStatus;
   note: string | null;
+  checkInAt: Date | null;
 }

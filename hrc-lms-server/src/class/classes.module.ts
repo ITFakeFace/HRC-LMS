@@ -8,6 +8,6 @@ import { ClassRepository } from './class.repository';
   imports: [PrismaModule],
   controllers: [ClassesController],
   providers: [ClassesService, ClassRepository],
-  exports: [ClassesService], // Export nếu module khác cần dùng service này
+  exports: [ClassesService],
 })
 export class ClassesModule {}

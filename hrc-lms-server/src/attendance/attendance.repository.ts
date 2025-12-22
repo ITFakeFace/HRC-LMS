@@ -1,123 +1,54 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  AttendanceSession,
-  AttendanceRecord,
-  Prisma,
-  AttendanceStatus,
-} from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { Prisma, AttendanceRecord, AttendanceStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class AttendanceRepository {
+export class AttendanceRecordRepository {
   constructor(private prisma: PrismaService) {}
 
-  // ===================== SESSION =====================
+  // --- UPDATE (CHECK-IN) ---
 
-  /**
-   * Transaction: Tạo Session -> Tạo hàng loạt Record ABSENT
-   */
-  async createSessionWithRecords(
-    classId: number,
-    teacherId: number,
-    studentIds: number[],
-  ): Promise<AttendanceSession> {
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Tạo Session
-      const session = await tx.attendanceSession.create({
-        data: {
-          classId,
-          openBy: teacherId,
-          openAt: new Date(),
-          closeAt: null,
-        },
-      });
-
-      // 2. Chuẩn bị data records
-      if (studentIds.length > 0) {
-        const recordsData = studentIds.map((stdId) => ({
-          sessionId: session.id,
-          stdId: stdId,
-          status: AttendanceStatus.ABSENT,
-        }));
-
-        // 3. Insert hàng loạt
-        await tx.attendanceRecord.createMany({
-          data: recordsData,
-        });
-      }
-
-      return session;
-    });
-  }
-
-  async findSessionById(id: number): Promise<AttendanceSession | null> {
-    return this.prisma.attendanceSession.findUnique({
-      where: { id },
-      include: {
-        opener: { select: { fullname: true } },
-        records: {
-          include: {
-            student: { select: { id: true, fullname: true, pID: true } },
-          },
-          orderBy: { student: { pID: 'asc' } },
-        },
+  // Sinh viên tự điểm danh (Quét QR)
+  async checkIn(sessionId: number, studentId: number): Promise<AttendanceRecord> {
+    return this.prisma.attendanceRecord.update({
+      where: {
+        sessionId_stdId: { sessionId, stdId: studentId },
+      },
+      data: {
+        status: AttendanceStatus.PRESENT,
+        checkInAt: new Date(),
       },
     });
   }
 
-  async findSessionsByClass(classId: number): Promise<AttendanceSession[]> {
-    return this.prisma.attendanceSession.findMany({
-      where: { classId },
-      orderBy: { openAt: 'desc' },
-      include: {
-        _count: { select: { records: true } },
-      },
-    });
-  }
-
-  async closeSession(id: number): Promise<AttendanceSession> {
-    return this.prisma.attendanceSession.update({
-      where: { id },
-      data: { closeAt: new Date() },
-    });
-  }
-
-  // ===================== RECORD =====================
-
-  async updateRecord(
+  // Giáo viên cập nhật thủ công (VD: Sửa từ Vắng thành Có phép)
+  async updateManual(
     sessionId: number,
     studentId: number,
     status: AttendanceStatus,
-    note?: string,
+    note?: string
   ): Promise<AttendanceRecord> {
     return this.prisma.attendanceRecord.update({
       where: {
-        sessionId_stdId: {
-          sessionId,
-          stdId: studentId,
-        },
+        sessionId_stdId: { sessionId, stdId: studentId },
       },
-      data: {
-        status,
-        note,
-      },
+      data: { status, note },
     });
   }
 
-  async getStudentRecordsInClass(
-    studentId: number,
-    classId: number,
-  ): Promise<AttendanceRecord[]> {
+  // --- READ ---
+
+  // Lấy lịch sử điểm danh của 1 sinh viên trong 1 lớp (Tính % chuyên cần)
+  async findByStudentInClass(studentId: number, classId: number): Promise<AttendanceRecord[]> {
     return this.prisma.attendanceRecord.findMany({
       where: {
         stdId: studentId,
-        session: {
-          classId: classId,
-        },
+        session: { classId },
       },
       include: {
-        session: true,
+        session: true, // Lấy ngày giờ buổi học
       },
+      orderBy: { session: { sessionNumber: 'asc' } },
     });
   }
 }

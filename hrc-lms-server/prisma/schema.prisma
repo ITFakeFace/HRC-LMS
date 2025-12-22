@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,94 +11,78 @@ datasource db {
 }
 
 // =========================================================================
-//                                CORE MODELS
+//                              CORE MODELS (USER & AUTH)
 // =========================================================================
 
 model User {
-  id                Int            @id @default(autoincrement())
-  pID               String         @unique @db.VarChar(12)
-  username          String         @unique @db.VarChar(50)
-  phone             String?        @unique @db.VarChar(10)
-  email             String         @unique @db.VarChar(100)
-  password          String         @db.VarChar(255)
-  avatar            String?
-  fullname          String         @db.VarChar(100)
-  gender            Boolean
-  dob               DateTime
-  lockoutEnd        DateTime?
-  isEmailVerified   Boolean        @default(false)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id              Int       @id @default(autoincrement())
+  pID             String    @unique @db.VarChar(12)
+  username        String    @unique @db.VarChar(50)
+  phone           String?   @unique @db.VarChar(10)
+  email           String    @unique @db.VarChar(100)
+  password        String    @db.VarChar(255)
+  avatar          String?
+  fullname        String    @db.VarChar(100)
+  gender          Boolean
+  dob             DateTime
+  lockoutEnd      DateTime?
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  // Mối quan hệ N:N với Role (Bảng liên kết ngầm định: UserToRole)
-  roles             Role[]         @relation("UserRoles")
+  // --- QUAN HỆ HỆ THỐNG ---
+  roles           Role[]         @relation("UserRoles")
+  refreshTokens   RefreshToken[]
+  sentMessages    ChatContent[]
 
-  refreshTokens     RefreshToken[]
+  // --- QUAN HỆ KHÓA HỌC (Quản lý) ---
+  createdCourses  Course[]       @relation("CreatedCourses")
+  editedCourses   Course[]       @relation("EditedCourses")
 
-  // Mối quan hệ 1:N với Course
-  createdCourses    Course[]       @relation("CreatedCourses")
-  editedCourses     Course[]       @relation("EditedCourses")
+  // --- QUAN HỆ LỚP HỌC & ĐIỂM DANH ---
   
-  sentMessages ChatContent[]
-
-  // --- QUAN HỆ MỚI (CLASS & ATTENDANCE) ---
-  
-  // 1. User là Học viên tham gia các lớp
+  // 1. Với tư cách HỌC VIÊN
   enrollments     Enrollment[]
+  attendanceRecords AttendanceRecord[] // Lịch sử đi học của user này
 
-  // 2. User là Giáo viên mở form điểm danh
-  openedSessions  AttendanceSession[] @relation("SessionOpener")
+  // 2. Với tư cách GIẢNG VIÊN (TEACHER)
+  lecturedClasses Class[]            @relation("ClassLecturer") // Các lớp được phân công dạy
+  openedSessions  ClassSession[]     @relation("SessionOpener") // Các buổi học mà user này đã bấm "Mở điểm danh"
 
-  // 3. User là Học viên được điểm danh (để truy vấn lịch sử điểm danh của user này)
-  attendanceRecords AttendanceRecord[]
-
-  @@map("Users") // Đặt tên bảng MySQL là Users
+  @@map("Users")
 }
 
 model Role {
-  id          Int            @id @default(autoincrement())
-  fullname    String         @unique @db.VarChar(50)
-  shortname   String         @unique @db.VarChar(15)
+  id          Int             @id @default(autoincrement())
+  fullname    String          @unique @db.VarChar(50)
+  shortname   String          @unique @db.VarChar(15)
+  users       User[]          @relation("UserRoles")
+  
+  parentRoles RoleHierarchy[] @relation("ParentOf")
+  childRoles  RoleHierarchy[] @relation("ChildOf")
+  permissions Permission[]    @relation("RolePermissions")
 
-  // Mối quan hệ N:N với User
-  users       User[]         @relation("UserRoles")
-
-  // Quan hệ phân cấp Tự tham chiếu N:N (Sử dụng bảng liên kết tường minh RoleHierarchy)
-  parentRoles RoleHierarchy[] @relation("ParentOf") // Vai trò: Là Role cha
-  childRoles  RoleHierarchy[] @relation("ChildOf")  // Vai trò: Là Role con
-
-  // Mối quan hệ N:N với Permission (Bảng liên kết ngầm định: RoleToPermission)
-  permissions Permission[]   @relation("RolePermissions")
-
-  @@map("Roles") // Đặt tên bảng MySQL là Roles
+  @@map("Roles")
 }
 
 model RoleHierarchy {
   parentId Int
   childId  Int
-
-  // Đổi tên relation để phù hợp với ngữ cảnh Parent/Child
-  parent Role @relation("ParentOf", fields: [parentId], references: [id], onDelete: Cascade)
-  child  Role @relation("ChildOf", fields: [childId], references: [id], onDelete: Cascade)
+  parent   Role @relation("ParentOf", fields: [parentId], references: [id], onDelete: Cascade)
+  child    Role @relation("ChildOf", fields: [childId], references: [id], onDelete: Cascade)
 
   @@id([parentId, childId])
-  @@map("RoleHierarchies") // Đặt tên bảng liên kết là RoleHierarchies
+  @@map("RoleHierarchies")
 }
 
 model Permission {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(100)
-  description String?  @db.VarChar(255)
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(100)
+  description String? @db.VarChar(255)
+  roles       Role[]  @relation("RolePermissions")
 
-  // Mối quan hệ N:N với Role
-  roles       Role[]   @relation("RolePermissions")
-
-  @@map("Permissions") // Đặt tên bảng MySQL là Permissions
+  @@map("Permissions")
 }
-
-// =========================================================================
-//                             OTHER MODELS
-// =========================================================================
 
 model RefreshToken {
   id                Int      @id @default(autoincrement())
@@ -119,65 +100,45 @@ model RefreshToken {
   @@map("RefreshTokens")
 }
 
+// =========================================================================
+//                              COURSE & CLASS MANAGEMENT
+// =========================================================================
+
 model Course {
   id          Int      @id @default(autoincrement())
   
-  // --- NHÓM ĐỊNH DANH & TÌM KIẾM (Cột cứng - Indexed) ---
+  // Metadata
   name        String   @db.VarChar(255)
-  code        String   @unique @db.VarChar(50)  // Ví dụ: "HRC-RS01" -> Dùng để tìm kiếm chính xác
-  slug        String   @unique @db.VarChar(255) // Ví dụ: "thu-hut-va-tuyen-chon-nhan-su" -> Dùng cho URL
-  status      Int      @default(0)              // 0: Draft, 1: Published
-  
-  description String?  @db.Text                 // Dùng Text thay vì VarChar để lưu được nhiều hơn
-  duration    String?  @db.VarChar(255)         // Lưu chuỗi: "10 buổi, mỗi buổi 2.5 giờ"
-  coverImage  Bytes?                            // Lưu ảnh cover (Base64 -> Buffer)
+  code        String   @unique @db.VarChar(50)
+  slug        String   @unique @db.VarChar(255)
+  status      Int      @default(0) // 0: Draft, 1: Published
+  description String?  @db.Text
+  duration    String?  @db.VarChar(255)
+  coverImage  Bytes?   
 
-  // --- NHÓM JSON (Lưu trữ linh hoạt - Flexible) ---
-  
-  // Mảng String: ["Mục tiêu 1", "Mục tiêu 2"...]
-  objectives  Json     @map("objectives")      // Tên cũ: courseObjectives
-  
-  // Mảng String: ["Người học A", "Người học B"...]
-  audiences   Json?    @map("audiences")       // Tên cũ: targetLearners
-  
-  // Mảng String: ["Yêu cầu 1"...]
+  // Flexible JSON Data
+  objectives   Json     @map("objectives")
+  audiences    Json?    @map("audiences")
   requirements Json?
-  
-  // Mảng String: ["Thứ 7...", "Thứ 2..."]
   schedule     Json?
-  
-  // Mảng String: ["Cơ sở 1", "Cơ sở 2"]
   locations    Json?
-  
-  // Object: { "part_exam": "...", "final_exam": "..." }
-  assessment   Json?    @map("assessment")     // Tên cũ: assessmentMethods
-  
-  // Object: { "mandatory": "...", "references": "..." }
+  assessment   Json?    @map("assessment")
   materials    Json?
-  
-  // Mảng Object (QUAN TRỌNG: Cần chuẩn hóa từ Object key động sang Mảng)
-  // [ { "title": "Buổi 1", "topics": ["A", "B"] }, ... ]
   contents     Json?
-
-  // Mảng String: ["Giảng viên A", "Giảng viên B"] 
-  // (Nếu sau này cần quản lý giảng viên chặt chẽ thì tách bảng riêng, còn hiện tại lưu tên thì dùng JSON)
   instructors  Json?
 
-  // --- QUAN HỆ & METADATA ---
+  // Relations
   creatorId    Int
-  lastEditor   Int?     // Có thể null nếu chưa ai sửa
-
+  lastEditor   Int?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   creator      User     @relation("CreatedCourses", fields: [creatorId], references: [id])
   editor       User?    @relation("EditedCourses", fields: [lastEditor], references: [id])
-  // Mối quan hệ N:N với Category
   categories   Category[] @relation("CourseCategories")
-  // --- QUAN HỆ MỚI ---
-  // Một khóa học (template) có nhiều lớp học (instances)
-  classes     Class[]
   
+  // Quan hệ với Lớp học (Instances)
+  classes      Class[]
 
   @@map("Courses")
 }
@@ -186,151 +147,175 @@ model Category {
   id          Int      @id @default(autoincrement())
   name        String   @unique @db.VarChar(255)
   description String?  @db.VarChar(255)
-
-  // Mối quan hệ N:N với Course
   courses     Course[] @relation("CourseCategories")
 
   @@map("Categories")
 }
 
-// 2. Bảng ClientSession (Phiên chat của khách)
-model ClientSession {
-  id        Int       @id @default(autoincrement())
-  AIEnable  Boolean   @default(true) // Mặc định bật AI
-  isEnded   Boolean   @default(false) // Mặc định chưa kết thúc
-  createdAt DateTime  @default(now())
-
-  // Mối quan hệ 1:N với ChatContent (1 phiên có nhiều tin nhắn)
-  messages ChatContent[]
-
-  @@map("ClientSessions")
-}
-
-// 3. Bảng ChatContent (Nội dung chat)
-model ChatContent {
-  id        Int      @id @default(autoincrement())
-  message   String   @db.VarChar(255)
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  // --- QUAN HỆ 1: PHIÊN CHAT (BẮT BUỘC) ---
-  // Tin nhắn này thuộc về phiên chat nào?
-  sessionId Int
-  session   ClientSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  // --- QUAN HỆ 2: NGƯỜI GỬI (LÀ USER/AI) ---
-  // Ai gửi tin nhắn này? (Có thể Null)
-  // - Nếu senderId = NULL  => Người gửi là KHÁCH (Guest/ClientSession owner)
-  // - Nếu senderId = VALUE => Người gửi là USER (Có thể là AI hoặc Agent)
-  senderId Int?
-  sender   User? @relation(fields: [senderId], references: [id], onDelete: SetNull)
-
-  @@map("ChatContents")
-}
-
-// MODEL MỚI: Lớp học cụ thể
+// MODEL CLASS: Lớp học cụ thể
 model Class {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(50) // Mã lớp, VD: "HRC-RS01-K19"
-  name        String   @db.VarChar(255)        // Tên lớp
-  startDate   DateTime
-  endDate     DateTime?
-  status      ClassStatus @default(ACTIVE)     // Enum trạng thái lớp
+  id            Int         @id @default(autoincrement())
+  code          String      @unique @db.VarChar(50) 
+  name          String      @db.VarChar(255)
+  
+  // --- CẤU HÌNH LỊCH HỌC (Dùng để sinh ClassSession) ---
+  startDate     DateTime    // Ngày khai giảng
+  endDate       DateTime?   // Ngày bế giảng (null nếu tính theo số buổi)
+  totalSessions Int         @default(0) 
+  
+  shift         ClassShift  // Ca học: MWF (2-4-6) hoặc TTS (3-5-7)
+  startTime     String      @default("18:00") 
+  endTime       String      @default("21:30") 
 
-  // Quan hệ với Course
-  courseId    Int
-  course      Course   @relation(fields: [courseId], references: [id])
+  status        ClassStatus @default(UPCOMING)
 
-  // Quan hệ: Một lớp có nhiều học viên đăng ký
-  enrollments Enrollment[]
+  // --- QUAN HỆ ---
+  courseId      Int
+  course        Course      @relation(fields: [courseId], references: [id])
 
-  // Quan hệ: Một lớp có nhiều buổi điểm danh
-  attendanceSessions AttendanceSession[]
+  // Giảng viên chính thức của lớp
+  lecturerId    Int?
+  lecturer      User?       @relation("ClassLecturer", fields: [lecturerId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // Danh sách học viên
+  enrollments   Enrollment[]
+
+  // Danh sách Lịch học / Buổi học thực tế
+  sessions      ClassSession[]
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@map("Classes")
 }
 
-// MODEL MỚI: Đăng ký học (Bảng trung gian User - Class)
+// MODEL ENROLLMENT: Danh sách đăng ký
 model Enrollment {
-  id        Int      @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   studentId Int
   classId   Int
-  joinedAt  DateTime @default(now())
-  status    EnrollmentStatus @default(LEARNING) // Đang học, Bảo lưu, Đã xong...
+  joinedAt  DateTime         @default(now())
+  status    EnrollmentStatus @default(LEARNING) 
 
-  student   User     @relation(fields: [studentId], references: [id])
-  class     Class    @relation(fields: [classId], references: [id])
+  student   User             @relation(fields: [studentId], references: [id])
+  class     Class            @relation(fields: [classId], references: [id])
 
-  // Ràng buộc: Một User chỉ đăng ký 1 Class một lần
   @@unique([studentId, classId]) 
   @@map("Enrollments")
 }
 
 // =========================================================================
-//                              ATTENDANCE MODELS
+//                              SCHEDULE & ATTENDANCE
 // =========================================================================
 
-// MODEL MỚI: Phiên điểm danh (Cái Form giáo viên mở)
-model AttendanceSession {
-  id        Int      @id @default(autoincrement())
+// MODEL CLASS SESSION: Vừa là Lịch Học, Vừa là Phiên Điểm Danh
+model ClassSession {
+  id             Int           @id @default(autoincrement())
   
-  // Thuộc về lớp nào?
-  classId   Int
-  class     Class    @relation(fields: [classId], references: [id])
+  classId        Int
+  class          Class         @relation(fields: [classId], references: [id], onDelete: Cascade)
 
-  // Ai mở form? (Teacher)
-  openBy    Int
-  opener    User     @relation("SessionOpener", fields: [openBy], references: [id])
+  // --- THÔNG TIN LỊCH (Schedule) ---
+  sessionNumber  Int           // Buổi số 1, 2, 3...
+  date           DateTime      // Ngày học
+  startTime      DateTime      // Thời gian bắt đầu (DateTime đầy đủ)
+  endTime        DateTime      // Thời gian kết thúc (DateTime đầy đủ)
+  title          String?       // Chủ đề buổi học (nếu có)
+  description    String?       @db.Text
 
-  // Thời gian
-  openAt    DateTime @default(now())
-  closeAt   DateTime? // Nếu null nghĩa là đang mở, chưa đóng
+  // --- THÔNG TIN ĐIỂM DANH (Attendance Execution) ---
+  status         SessionStatus @default(SCHEDULED) // SCHEDULED -> ONGOING -> FINISHED
+  
+  isAttendanceOpen Boolean     @default(false)     // Đang mở cho quét QR không?
+  attendanceCode   String?     @db.VarChar(10)     // Mã OTP (nếu cần)
 
-  // Mã phiên (Optional): Dùng nếu muốn sinh code cho học sinh tự nhập
-  code      String?  @db.VarChar(10) 
+  // Ai là người kích hoạt buổi học này?
+  openedBy       Int?
+  opener         User?         @relation("SessionOpener", fields: [openedBy], references: [id])
 
-  // Danh sách các bản ghi điểm danh trong phiên này
-  records   AttendanceRecord[]
+  // Danh sách kết quả điểm danh của sinh viên
+  records        AttendanceRecord[]
 
-  @@map("AttendanceSessions")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([classId, date])
+  @@map("ClassSessions")
 }
 
-// MODEL MỚI: Bản ghi điểm danh chi tiết (Cho từng học sinh)
+// MODEL ATTENDANCE RECORD: Chi tiết điểm danh của từng sinh viên
 model AttendanceRecord {
-  id        Int      @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
 
-  // Thuộc về phiên điểm danh nào?
+  // Liên kết trực tiếp với Session
   sessionId Int
-  session   AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session   ClassSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  // Điểm danh cho học sinh nào?
+  // Liên kết với Sinh viên
   stdId     Int
-  student   User     @relation(fields: [stdId], references: [id])
+  student   User             @relation(fields: [stdId], references: [id])
 
-  // Trạng thái: Có mặt, Vắng, Muộn...
+  // Trạng thái & Kết quả
   status    AttendanceStatus @default(ABSENT) 
-  
-  // Ghi chú (VD: Lý do vắng)
-  note      String?  @db.VarChar(255)
-  
-  updatedAt DateTime @updatedAt // Thời điểm cập nhật trạng thái
+  note      String?          @db.VarChar(255)
+  checkInAt DateTime?        // Thời gian thực tế quét QR
 
-  // Ràng buộc: Trong 1 phiên, 1 học sinh chỉ có 1 bản ghi
-  @@unique([sessionId, stdId])
+  updatedAt DateTime         @updatedAt
+
+  @@unique([sessionId, stdId]) // Một sinh viên chỉ có 1 record trong 1 buổi
   @@map("AttendanceRecords")
+}
+
+// =========================================================================
+//                              CHAT & CLIENT SUPPORT
+// =========================================================================
+
+model ClientSession {
+  id        Int           @id @default(autoincrement())
+  AIEnable  Boolean       @default(true)
+  isEnded   Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  messages  ChatContent[]
+
+  @@map("ClientSessions")
+}
+
+model ChatContent {
+  id        Int           @id @default(autoincrement())
+  message   String        @db.VarChar(255)
+  isRead    Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  sessionId Int
+  session   ClientSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  senderId  Int?
+  sender    User?         @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@map("ChatContents")
 }
 
 // =========================================================================
 //                                ENUMS
 // =========================================================================
 
+enum ClassShift {
+  MWF_EVENING // Thứ 2-4-6 (18:00 - 21:30)
+  TTS_EVENING // Thứ 3-5-7 (18:00 - 21:30)
+}
+
 enum ClassStatus {
-  ACTIVE
-  FINISHED
-  CANCELED
+  UPCOMING // Sắp mở
+  ACTIVE   // Đang diễn ra
+  FINISHED // Đã kết thúc
+  CANCELED // Đã hủy
+}
+
+enum SessionStatus {
+  SCHEDULED // Đã lên lịch, chưa học
+  ONGOING   // Đang học (Giáo viên đã bấm Start)
+  FINISHED  // Đã học xong
+  CANCELED  // Buổi học bị hủy/nghỉ
 }
 
 enum EnrollmentStatus {
@@ -344,5 +329,5 @@ enum AttendanceStatus {
   PRESENT
   ABSENT
   LATE
-  EXCUSED // Có phép
+  EXCUSED
 }
