@@ -20,6 +20,8 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { ImageModule } from './image/image.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { FormRequestsModule } from './form-requests/form-requests.module';
+import { ErrorReportsModule } from './error-reports/error-reports.module';
 
 
 @Module({
@@ -70,6 +72,8 @@ import { join } from 'path';
     SessionsModule,
     AttendanceModule,
     ImageModule,
+    FormRequestsModule, 
+    ErrorReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
