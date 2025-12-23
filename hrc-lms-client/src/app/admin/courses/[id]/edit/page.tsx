@@ -1,19 +1,19 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation'; // useParams để lấy ID
-import { InputText } from 'primereact/inputtext';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Button } from 'primereact/button';
-import { MultiSelect } from 'primereact/multiselect';
-import { Dropdown } from 'primereact/dropdown';
-import { FileUpload } from 'primereact/fileupload';
-import { Toast } from 'primereact/toast';
-import { ProgressSpinner } from 'primereact/progressspinner'; // Thêm spinner khi load data
-import * as yup from 'yup';
-import { useFormik } from 'formik';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
-import api from '@/src/api/api';
+"use client";
+import React, { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation"; // useParams để lấy ID
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Button } from "primereact/button";
+import { MultiSelect } from "primereact/multiselect";
+import { Dropdown } from "primereact/dropdown";
+import { FileUpload } from "primereact/fileupload";
+import { Toast } from "primereact/toast";
+import { ProgressSpinner } from "primereact/progressspinner"; // Thêm spinner khi load data
+import * as yup from "yup";
+import { useFormik } from "formik";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import api from "@/src/api/api";
 
 interface Category {
   id: number;
@@ -22,44 +22,55 @@ interface Category {
 
 // Schema Validation giữ nguyên
 const validationSchema = yup.object({
-  code: yup.string()
-    .required('Mã khóa học không được để trống')
-    .max(50, 'Mã khóa học tối đa 50 ký tự'),
-  name: yup.string()
-    .required('Tên khóa học không được để trống')
-    .max(255, 'Tên khóa học tối đa 255 ký tự'),
+  code: yup
+    .string()
+    .required("Mã khóa học không được để trống")
+    .max(50, "Mã khóa học tối đa 50 ký tự"),
+  name: yup
+    .string()
+    .required("Tên khóa học không được để trống")
+    .max(255, "Tên khóa học tối đa 255 ký tự"),
   description: yup.string().optional().nullable(),
   duration: yup.string().optional().nullable(),
-  objectives: yup.array()
-    .of(yup.string().required('Mục tiêu không được để trống'))
-    .min(1, 'Cần ít nhất 1 mục tiêu')
-    .required('Mục tiêu không được để trống'),
+  objectives: yup
+    .array()
+    .of(yup.string().required("Mục tiêu không được để trống"))
+    .min(1, "Cần ít nhất 1 mục tiêu")
+    .required("Mục tiêu không được để trống"),
   audiences: yup.array().of(yup.string()).optional().nullable(),
   requirements: yup.array().of(yup.string()).optional().nullable(),
   schedule: yup.array().of(yup.string()).optional().nullable(),
   locations: yup.array().of(yup.string()).optional().nullable(),
   instructors: yup.array().of(yup.string()).optional().nullable(),
-  assessment: yup.object({
-    part_exam: yup.string().optional().nullable(),
-    final_exam: yup.string().optional().nullable(),
-    method: yup.string().optional().nullable(),
-  }).optional().nullable(),
-  materials: yup.object({
-    mandatory: yup.string().optional().nullable(),
-    references: yup.string().optional().nullable(),
-    software: yup.string().optional().nullable(),
-  }).optional().nullable(),
-  contents: yup.array()
+  assessment: yup
+    .object({
+      part_exam: yup.string().optional().nullable(),
+      final_exam: yup.string().optional().nullable(),
+      method: yup.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  materials: yup
+    .object({
+      mandatory: yup.string().optional().nullable(),
+      references: yup.string().optional().nullable(),
+      software: yup.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  contents: yup
+    .array()
     .of(
       yup.object({
-        title: yup.string().required('Tiêu đề không được để trống'),
-        topics: yup.array()
-          .of(yup.string().required('Chủ đề không được để trống'))
-          .min(1, 'Cần ít nhất 1 chủ đề'),
+        title: yup.string().required("Tiêu đề không được để trống"),
+        topics: yup
+          .array()
+          .of(yup.string().required("Chủ đề không được để trống"))
+          .min(1, "Cần ít nhất 1 chủ đề"),
       })
     )
-    .min(1, 'Cần ít nhất 1 nội dung')
-    .required('Nội dung không được để trống'),
+    .min(1, "Cần ít nhất 1 nội dung")
+    .required("Nội dung không được để trống"),
   coverImage: yup.string().optional().nullable(),
   status: yup.number().optional(),
   categoryIds: yup.array().of(yup.number()).optional(),
@@ -69,7 +80,8 @@ const EditCoursePage: React.FC = () => {
   const router = useRouter();
   const params = useParams(); // Lấy ID từ URL
   const courseId = Number(params.id); // Convert sang number
-  
+  // 1. THÊM STATE ĐỂ LƯU FILE GỐC
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const toast = React.useRef<Toast>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false); // Loading khi submit
@@ -77,20 +89,20 @@ const EditCoursePage: React.FC = () => {
 
   // State lưu giá trị khởi tạo cho Form
   const [initialValues, setInitialValues] = useState({
-    code: '',
-    name: '',
-    description: '',
-    duration: '',
-    objectives: [''],
-    audiences: [''],
-    requirements: [''],
-    schedule: [''],
-    locations: [''],
-    instructors: [''],
-    assessment: { part_exam: '', final_exam: '', method: '' },
-    materials: { mandatory: '', references: '', software: '' },
-    contents: [{ title: '', topics: [''] }],
-    coverImage: '',
+    code: "",
+    name: "",
+    description: "",
+    duration: "",
+    objectives: [""],
+    audiences: [""],
+    requirements: [""],
+    schedule: [""],
+    locations: [""],
+    instructors: [""],
+    assessment: { part_exam: "", final_exam: "", method: "" },
+    materials: { mandatory: "", references: "", software: "" },
+    contents: [{ title: "", topics: [""] }],
+    coverImage: "",
     status: 1,
     categoryIds: [],
   });
@@ -106,8 +118,8 @@ const EditCoursePage: React.FC = () => {
       setFetching(true);
       // Gọi song song cả 2 API: Lấy Categories và Lấy chi tiết Course
       const [categoriesRes, courseRes] = await Promise.all([
-        api.get('/categories'),
-        api.get(`/courses/${courseId}`)
+        api.get("/categories"),
+        api.get(`/courses/${courseId}`),
       ]);
 
       // 1. Set Categories
@@ -120,52 +132,58 @@ const EditCoursePage: React.FC = () => {
       if (courseData) {
         // Map dữ liệu từ API về Formik format
         setInitialValues({
-          code: courseData.code || '',
-          name: courseData.name || '',
-          description: courseData.description || '',
-          duration: courseData.duration || '',
+          code: courseData.code || "",
+          name: courseData.name || "",
+          description: courseData.description || "",
+          duration: courseData.duration || "",
           status: courseData.status ?? 1,
-          coverImage: courseData.coverImage || '',
-          
+          coverImage: courseData.coverImage || "",
+
           // Xử lý mảng (fallback về mảng chứa 1 chuỗi rỗng nếu null/empty để form không bị lỗi)
-          objectives: courseData.objectives?.length ? courseData.objectives : [''],
-          audiences: courseData.audiences?.length ? courseData.audiences : [''],
-          requirements: courseData.requirements?.length ? courseData.requirements : [''],
-          schedule: courseData.schedule?.length ? courseData.schedule : [''],
-          locations: courseData.locations?.length ? courseData.locations : [''],
-          instructors: courseData.instructors?.length ? courseData.instructors : [''],
-          
+          objectives: courseData.objectives?.length
+            ? courseData.objectives
+            : [""],
+          audiences: courseData.audiences?.length ? courseData.audiences : [""],
+          requirements: courseData.requirements?.length
+            ? courseData.requirements
+            : [""],
+          schedule: courseData.schedule?.length ? courseData.schedule : [""],
+          locations: courseData.locations?.length ? courseData.locations : [""],
+          instructors: courseData.instructors?.length
+            ? courseData.instructors
+            : [""],
+
           // Xử lý Object
           assessment: {
-            part_exam: courseData.assessment?.part_exam || '',
-            final_exam: courseData.assessment?.final_exam || '',
-            method: courseData.assessment?.method || '',
+            part_exam: courseData.assessment?.part_exam || "",
+            final_exam: courseData.assessment?.final_exam || "",
+            method: courseData.assessment?.method || "",
           },
           materials: {
-            mandatory: courseData.materials?.mandatory || '',
-            references: courseData.materials?.references || '',
-            software: courseData.materials?.software || '',
+            mandatory: courseData.materials?.mandatory || "",
+            references: courseData.materials?.references || "",
+            software: courseData.materials?.software || "",
           },
-          
+
           // Xử lý Contents
-          contents: courseData.contents?.length 
-            ? courseData.contents 
-            : [{ title: '', topics: [''] }],
+          contents: courseData.contents?.length
+            ? courseData.contents
+            : [{ title: "", topics: [""] }],
 
           // Quan trọng: Map mảng object categories [{id:1, name: A}] -> mảng ID [1]
-          categoryIds: courseData.categories 
-            ? courseData.categories.map((c: any) => c.id) 
+          categoryIds: courseData.categories
+            ? courseData.categories.map((c: any) => c.id)
             : [],
         });
       }
     } catch (error) {
       toast.current?.show({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Không thể tải dữ liệu khóa học',
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể tải dữ liệu khóa học",
       });
       // Nếu lỗi, quay về trang danh sách sau 2s
-      setTimeout(() => router.push('/admin/courses'), 2000);
+      setTimeout(() => router.push("/admin/courses"), 2000);
     } finally {
       setFetching(false);
     }
@@ -173,42 +191,77 @@ const EditCoursePage: React.FC = () => {
 
   const formik = useFormik({
     initialValues: initialValues,
-    enableReinitialize: true, // Quan trọng: Cho phép form cập nhật khi initialValues thay đổi (sau khi fetch API)
+    enableReinitialize: true,
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true);
       try {
-        // Clean data giống trang Create
-        const cleanedData = {
-          ...values,
-          objectives: values.objectives.filter(v => v && v.trim()),
-          audiences: values.audiences?.filter(v => v && v.trim()),
-          requirements: values.requirements?.filter(v => v && v.trim()),
-          schedule: values.schedule?.filter(v => v && v.trim()),
-          locations: values.locations?.filter(v => v && v.trim()),
-          instructors: values.instructors?.filter(v => v && v.trim()),
-          contents: values.contents.map(c => ({
-            ...c,
-            topics: c.topics.filter(t => t && t.trim()),
-          })),
-        };
+        const formData = new FormData();
 
-        // GỌI API PUT
-        await api.put(`/courses/${courseId}`, cleanedData);
-        
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Thành công',
-          detail: 'Cập nhật khóa học thành công',
+        // 1. Các trường đơn giản (String)
+        formData.append("code", values.code);
+        formData.append("name", values.name);
+        if (values.description)
+          formData.append("description", values.description);
+        if (values.duration) formData.append("duration", values.duration);
+
+        // 2. Các trường Số (Number) -> Backend nhận là String "1", ta sẽ xử lý ở DTO sau
+        formData.append("status", String(values.status));
+
+        // 3. Mảng ID (categoryIds) -> Gửi JSON string cho gọn
+        formData.append("categoryIds", JSON.stringify(values.categoryIds));
+
+        // 4. Các Mảng String đơn giản -> Gửi JSON string luôn (An toàn hơn gửi loop)
+        formData.append("objectives", JSON.stringify(values.objectives));
+        formData.append("audiences", JSON.stringify(values.audiences || []));
+        formData.append(
+          "requirements",
+          JSON.stringify(values.requirements || [])
+        );
+        formData.append("schedule", JSON.stringify(values.schedule || []));
+        formData.append("locations", JSON.stringify(values.locations || []));
+        formData.append(
+          "instructors",
+          JSON.stringify(values.instructors || [])
+        );
+
+        // 5. Các Object/Array phức tạp -> JSON.stringify (QUAN TRỌNG)
+        if (values.assessment) {
+          formData.append("assessment", JSON.stringify(values.assessment));
+        }
+        if (values.materials) {
+          formData.append("materials", JSON.stringify(values.materials));
+        }
+        // Content là mảng object phức tạp, stringify là cách tốt nhất
+        formData.append("contents", JSON.stringify(values.contents));
+
+        // 6. File ảnh
+        if (selectedFile) {
+          formData.append("coverImage", selectedFile);
+        }
+
+        // 4. GỌI API VỚI FORMDATA
+        // Axios/Fetch sẽ tự động thêm header 'Content-Type': 'multipart/form-data' khi thấy FormData
+        await api.put(`/courses/${courseId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
-        
-        // Quay về danh sách sau 1.5s
-        setTimeout(() => router.push('/admin/courses'), 1500);
-      } catch (error: any) {
+
         toast.current?.show({
-          severity: 'error',
-          summary: 'Lỗi',
-          detail: error?.response?.data?.message || 'Không thể cập nhật khóa học',
+          severity: "success",
+          summary: "Thành công",
+          detail: "Cập nhật khóa học thành công",
+        });
+
+        setTimeout(() => router.push("/admin/courses"), 1500);
+      } catch (error: any) {
+        console.error(error); // Log lỗi ra xem chi tiết
+        toast.current?.show({
+          severity: "error",
+          summary: "Lỗi",
+          detail:
+            error?.response?.data?.message || "Không thể cập nhật khóa học",
         });
       } finally {
         setLoading(false);
@@ -222,12 +275,16 @@ const EditCoursePage: React.FC = () => {
   };
 
   // --- CÁC HÀM HELPER GIỮ NGUYÊN ---
+  // 2. SỬA HÀM UPLOAD ẢNH (Chỉ để preview và lưu file gốc)
   const handleImageUpload = (e: any) => {
     const file = e.files[0];
+    setSelectedFile(file); // Lưu file gốc để gửi lên Server
+
+    // Vẫn giữ logic Base64 này CHỈ ĐỂ HIỂN THỊ PREVIEW trên UI
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64 = (reader.result as string).split(',')[1];
-      formik.setFieldValue('coverImage', base64);
+      const base64 = (reader.result as string).split(",")[1];
+      formik.setFieldValue("coverImage", base64);
     };
     reader.readAsDataURL(file);
   };
@@ -235,12 +292,15 @@ const EditCoursePage: React.FC = () => {
   const addArrayItem = (field: string) => {
     // Ép kiểu để TS không báo lỗi
     const current = (formik.values as any)[field] || [];
-    formik.setFieldValue(field, [...current, '']);
+    formik.setFieldValue(field, [...current, ""]);
   };
 
   const removeArrayItem = (field: string, index: number) => {
     const current = (formik.values as any)[field] || [];
-    formik.setFieldValue(field, current.filter((_: any, i: number) => i !== index));
+    formik.setFieldValue(
+      field,
+      current.filter((_: any, i: number) => i !== index)
+    );
   };
 
   const updateArrayItem = (field: string, index: number, value: string) => {
@@ -251,40 +311,52 @@ const EditCoursePage: React.FC = () => {
   };
 
   const addContentItem = () => {
-    formik.setFieldValue('contents', [...formik.values.contents, { title: '', topics: [''] }]);
+    formik.setFieldValue("contents", [
+      ...formik.values.contents,
+      { title: "", topics: [""] },
+    ]);
   };
 
   const removeContentItem = (index: number) => {
-    formik.setFieldValue('contents', formik.values.contents.filter((_, i) => i !== index));
+    formik.setFieldValue(
+      "contents",
+      formik.values.contents.filter((_, i) => i !== index)
+    );
   };
 
   const addContentTopic = (contentIndex: number) => {
     const updated = [...formik.values.contents];
-    updated[contentIndex].topics.push('');
-    formik.setFieldValue('contents', updated);
+    updated[contentIndex].topics.push("");
+    formik.setFieldValue("contents", updated);
   };
 
   const removeContentTopic = (contentIndex: number, topicIndex: number) => {
     const updated = [...formik.values.contents];
-    updated[contentIndex].topics = updated[contentIndex].topics.filter((_, i) => i !== topicIndex);
-    formik.setFieldValue('contents', updated);
+    updated[contentIndex].topics = updated[contentIndex].topics.filter(
+      (_, i) => i !== topicIndex
+    );
+    formik.setFieldValue("contents", updated);
   };
 
   const updateContentTitle = (index: number, value: string) => {
     const updated = [...formik.values.contents];
     updated[index].title = value;
-    formik.setFieldValue('contents', updated);
+    formik.setFieldValue("contents", updated);
   };
 
-  const updateContentTopic = (contentIndex: number, topicIndex: number, value: string) => {
+  const updateContentTopic = (
+    contentIndex: number,
+    topicIndex: number,
+    value: string
+  ) => {
     const updated = [...formik.values.contents];
     updated[contentIndex].topics[topicIndex] = value;
-    formik.setFieldValue('contents', updated);
+    formik.setFieldValue("contents", updated);
   };
 
   const statusOptions = [
-    { label: 'Hoạt động', value: 1 },
-    { label: 'Không hoạt động', value: 0 },
+    { label: "Hoạt động", value: 1 },
+    { label: "Không hoạt động", value: 0 },
   ];
 
   // Nếu đang fetch dữ liệu ban đầu -> Hiển thị loading spinner
@@ -292,8 +364,8 @@ const EditCoursePage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-            <ProgressSpinner />
-            <p className="mt-2 text-gray-500">Đang tải dữ liệu khóa học...</p>
+          <ProgressSpinner />
+          <p className="mt-2 text-gray-500">Đang tải dữ liệu khóa học...</p>
         </div>
       </div>
     );
@@ -302,28 +374,37 @@ const EditCoursePage: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <Toast ref={toast} />
-      
+
       <div className="mb-6 flex justify-between items-center">
         <div>
-            <h1 className="text-3xl font-bold text-gray-800">Chỉnh sửa khóa học</h1>
-            <p className="text-gray-600 mt-2">Cập nhật thông tin cho khóa học <span className="font-semibold">{formik.values.code}</span></p>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Chỉnh sửa khóa học
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Cập nhật thông tin cho khóa học{" "}
+            <span className="font-semibold">{formik.values.code}</span>
+          </p>
         </div>
-        <Button 
-            label="Quay lại" 
-            icon="pi pi-arrow-left" 
-            className="p-button-outlined" 
-            onClick={() => router.push('/admin/courses')} 
+        <Button
+          label="Quay lại"
+          icon="pi pi-arrow-left"
+          className="p-button-outlined"
+          onClick={() => router.push("/admin/courses")}
         />
       </div>
 
       <div className="space-y-6">
         {/* Basic Information */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Thông tin cơ bản</h2>
-          
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Thông tin cơ bản
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Mã khóa học *</label>
+              <label className="block text-sm font-medium mb-2">
+                Mã khóa học *
+              </label>
               <InputText
                 name="code"
                 value={formik.values.code}
@@ -338,7 +419,9 @@ const EditCoursePage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Thời lượng</label>
+              <label className="block text-sm font-medium mb-2">
+                Thời lượng
+              </label>
               <InputText
                 name="duration"
                 value={formik.values.duration}
@@ -350,7 +433,9 @@ const EditCoursePage: React.FC = () => {
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium mb-2">Tên khóa học *</label>
+            <label className="block text-sm font-medium mb-2">
+              Tên khóa học *
+            </label>
             <InputText
               name="name"
               value={formik.values.name}
@@ -381,7 +466,7 @@ const EditCoursePage: React.FC = () => {
               <label className="block text-sm font-medium mb-2">Danh mục</label>
               <MultiSelect
                 value={formik.values.categoryIds}
-                onChange={(e) => formik.setFieldValue('categoryIds', e.value)}
+                onChange={(e) => formik.setFieldValue("categoryIds", e.value)}
                 options={categories || []}
                 optionLabel="name"
                 optionValue="id"
@@ -392,10 +477,12 @@ const EditCoursePage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Trạng thái</label>
+              <label className="block text-sm font-medium mb-2">
+                Trạng thái
+              </label>
               <Dropdown
                 value={formik.values.status}
-                onChange={(e) => formik.setFieldValue('status', e.value)}
+                onChange={(e) => formik.setFieldValue("status", e.value)}
                 options={statusOptions}
                 placeholder="Chọn trạng thái"
                 className="w-full"
@@ -406,25 +493,29 @@ const EditCoursePage: React.FC = () => {
           <div className="mt-4">
             <label className="block text-sm font-medium mb-2">Hình ảnh</label>
             <div className="flex items-center gap-4">
-                {/* Hiển thị ảnh cũ nếu có */}
-                {formik.values.coverImage && (
-                    <div className="w-20 h-20 rounded overflow-hidden border">
-                         <img 
-                            src={`data:image/png;base64,${formik.values.coverImage}`} 
-                            alt="Cover" 
-                            className="w-full h-full object-cover"
-                            onError={(e) => (e.currentTarget.style.display = 'none')} // Ẩn nếu ảnh lỗi
-                         />
-                    </div>
-                )}
-                <FileUpload
-                    mode="basic"
-                    accept="image/*"
-                    maxFileSize={5000000}
-                    onSelect={handleImageUpload}
-                    chooseLabel={formik.values.coverImage ? "Thay đổi hình ảnh" : "Chọn hình ảnh"}
-                    className="w-full"
-                />
+              {/* Hiển thị ảnh cũ nếu có */}
+              {formik.values.coverImage && (
+                <div className="w-20 h-20 rounded overflow-hidden border">
+                  <img
+                    src={`data:image/png;base64,${formik.values.coverImage}`}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                    onError={(e) => (e.currentTarget.style.display = "none")} // Ẩn nếu ảnh lỗi
+                  />
+                </div>
+              )}
+              <FileUpload
+                mode="basic"
+                accept="image/*"
+                maxFileSize={5000000}
+                onSelect={handleImageUpload}
+                chooseLabel={
+                  formik.values.coverImage
+                    ? "Thay đổi hình ảnh"
+                    : "Chọn hình ảnh"
+                }
+                className="w-full"
+              />
             </div>
           </div>
         </div>
@@ -437,7 +528,7 @@ const EditCoursePage: React.FC = () => {
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
               label="Thêm"
-              onClick={() => addArrayItem('objectives')}
+              onClick={() => addArrayItem("objectives")}
               className="p-button-sm"
             />
           </div>
@@ -445,7 +536,9 @@ const EditCoursePage: React.FC = () => {
             <div key={idx} className="flex gap-2 mb-2">
               <InputText
                 value={obj}
-                onChange={(e) => updateArrayItem('objectives', idx, e.target.value)}
+                onChange={(e) =>
+                  updateArrayItem("objectives", idx, e.target.value)
+                }
                 className="flex-1"
                 placeholder="Nhập mục tiêu..."
               />
@@ -453,26 +546,30 @@ const EditCoursePage: React.FC = () => {
                 <Button
                   type="button"
                   icon={<FontAwesomeIcon icon={faTrash} />}
-                  onClick={() => removeArrayItem('objectives', idx)}
+                  onClick={() => removeArrayItem("objectives", idx)}
                   className="p-button-danger p-button-sm"
                 />
               )}
             </div>
           ))}
           {formik.touched.objectives && formik.errors.objectives && (
-            <small className="text-red-500">{formik.errors.objectives as string}</small>
+            <small className="text-red-500">
+              {formik.errors.objectives as string}
+            </small>
           )}
         </div>
 
         {/* Audiences */}
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-700">Đối tượng học viên</h2>
+            <h2 className="text-xl font-semibold text-gray-700">
+              Đối tượng học viên
+            </h2>
             <Button
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
               label="Thêm"
-              onClick={() => addArrayItem('audiences')}
+              onClick={() => addArrayItem("audiences")}
               className="p-button-sm"
             />
           </div>
@@ -480,14 +577,16 @@ const EditCoursePage: React.FC = () => {
             <div key={idx} className="flex gap-2 mb-2">
               <InputText
                 value={aud}
-                onChange={(e) => updateArrayItem('audiences', idx, e.target.value)}
+                onChange={(e) =>
+                  updateArrayItem("audiences", idx, e.target.value)
+                }
                 className="flex-1"
                 placeholder="Nhập đối tượng..."
               />
               <Button
                 type="button"
                 icon={<FontAwesomeIcon icon={faTrash} />}
-                onClick={() => removeArrayItem('audiences', idx)}
+                onClick={() => removeArrayItem("audiences", idx)}
                 className="p-button-danger p-button-sm"
               />
             </div>
@@ -502,7 +601,7 @@ const EditCoursePage: React.FC = () => {
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
               label="Thêm"
-              onClick={() => addArrayItem('requirements')}
+              onClick={() => addArrayItem("requirements")}
               className="p-button-sm"
             />
           </div>
@@ -510,14 +609,16 @@ const EditCoursePage: React.FC = () => {
             <div key={idx} className="flex gap-2 mb-2">
               <InputText
                 value={req}
-                onChange={(e) => updateArrayItem('requirements', idx, e.target.value)}
+                onChange={(e) =>
+                  updateArrayItem("requirements", idx, e.target.value)
+                }
                 className="flex-1"
                 placeholder="Nhập yêu cầu..."
               />
               <Button
                 type="button"
                 icon={<FontAwesomeIcon icon={faTrash} />}
-                onClick={() => removeArrayItem('requirements', idx)}
+                onClick={() => removeArrayItem("requirements", idx)}
                 className="p-button-danger p-button-sm"
               />
             </div>
@@ -532,7 +633,7 @@ const EditCoursePage: React.FC = () => {
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
               label="Thêm"
-              onClick={() => addArrayItem('schedule')}
+              onClick={() => addArrayItem("schedule")}
               className="p-button-sm"
             />
           </div>
@@ -540,14 +641,16 @@ const EditCoursePage: React.FC = () => {
             <div key={idx} className="flex gap-2 mb-2">
               <InputText
                 value={sch}
-                onChange={(e) => updateArrayItem('schedule', idx, e.target.value)}
+                onChange={(e) =>
+                  updateArrayItem("schedule", idx, e.target.value)
+                }
                 className="flex-1"
                 placeholder="Nhập lịch học..."
               />
               <Button
                 type="button"
                 icon={<FontAwesomeIcon icon={faTrash} />}
-                onClick={() => removeArrayItem('schedule', idx)}
+                onClick={() => removeArrayItem("schedule", idx)}
                 className="p-button-danger p-button-sm"
               />
             </div>
@@ -562,7 +665,7 @@ const EditCoursePage: React.FC = () => {
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
               label="Thêm"
-              onClick={() => addArrayItem('locations')}
+              onClick={() => addArrayItem("locations")}
               className="p-button-sm"
             />
           </div>
@@ -570,14 +673,16 @@ const EditCoursePage: React.FC = () => {
             <div key={idx} className="flex gap-2 mb-2">
               <InputText
                 value={loc}
-                onChange={(e) => updateArrayItem('locations', idx, e.target.value)}
+                onChange={(e) =>
+                  updateArrayItem("locations", idx, e.target.value)
+                }
                 className="flex-1"
                 placeholder="Nhập địa điểm..."
               />
               <Button
                 type="button"
                 icon={<FontAwesomeIcon icon={faTrash} />}
-                onClick={() => removeArrayItem('locations', idx)}
+                onClick={() => removeArrayItem("locations", idx)}
                 className="p-button-danger p-button-sm"
               />
             </div>
@@ -592,7 +697,7 @@ const EditCoursePage: React.FC = () => {
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
               label="Thêm"
-              onClick={() => addArrayItem('instructors')}
+              onClick={() => addArrayItem("instructors")}
               className="p-button-sm"
             />
           </div>
@@ -600,14 +705,16 @@ const EditCoursePage: React.FC = () => {
             <div key={idx} className="flex gap-2 mb-2">
               <InputText
                 value={ins}
-                onChange={(e) => updateArrayItem('instructors', idx, e.target.value)}
+                onChange={(e) =>
+                  updateArrayItem("instructors", idx, e.target.value)
+                }
                 className="flex-1"
                 placeholder="Nhập thông tin giảng viên..."
               />
               <Button
                 type="button"
                 icon={<FontAwesomeIcon icon={faTrash} />}
-                onClick={() => removeArrayItem('instructors', idx)}
+                onClick={() => removeArrayItem("instructors", idx)}
                 className="p-button-danger p-button-sm"
               />
             </div>
@@ -619,28 +726,40 @@ const EditCoursePage: React.FC = () => {
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Đánh giá</h2>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium mb-2">Thi từng học phần</label>
+              <label className="block text-sm font-medium mb-2">
+                Thi từng học phần
+              </label>
               <InputText
-                value={formik.values.assessment?.part_exam || ''}
-                onChange={(e) => formik.setFieldValue('assessment.part_exam', e.target.value)}
+                value={formik.values.assessment?.part_exam || ""}
+                onChange={(e) =>
+                  formik.setFieldValue("assessment.part_exam", e.target.value)
+                }
                 className="w-full"
                 placeholder="VD: 30%"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Thi cuối kỳ</label>
+              <label className="block text-sm font-medium mb-2">
+                Thi cuối kỳ
+              </label>
               <InputText
-                value={formik.values.assessment?.final_exam || ''}
-                onChange={(e) => formik.setFieldValue('assessment.final_exam', e.target.value)}
+                value={formik.values.assessment?.final_exam || ""}
+                onChange={(e) =>
+                  formik.setFieldValue("assessment.final_exam", e.target.value)
+                }
                 className="w-full"
                 placeholder="VD: 70%"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Phương thức</label>
+              <label className="block text-sm font-medium mb-2">
+                Phương thức
+              </label>
               <InputText
-                value={formik.values.assessment?.method || ''}
-                onChange={(e) => formik.setFieldValue('assessment.method', e.target.value)}
+                value={formik.values.assessment?.method || ""}
+                onChange={(e) =>
+                  formik.setFieldValue("assessment.method", e.target.value)
+                }
                 className="w-full"
                 placeholder="Phương thức đánh giá..."
               />
@@ -653,19 +772,27 @@ const EditCoursePage: React.FC = () => {
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Tài liệu</h2>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium mb-2">Tài liệu bắt buộc</label>
+              <label className="block text-sm font-medium mb-2">
+                Tài liệu bắt buộc
+              </label>
               <InputTextarea
-                value={formik.values.materials?.mandatory || ''}
-                onChange={(e) => formik.setFieldValue('materials.mandatory', e.target.value)}
+                value={formik.values.materials?.mandatory || ""}
+                onChange={(e) =>
+                  formik.setFieldValue("materials.mandatory", e.target.value)
+                }
                 rows={2}
                 className="w-full"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Tài liệu tham khảo</label>
+              <label className="block text-sm font-medium mb-2">
+                Tài liệu tham khảo
+              </label>
               <InputTextarea
-                value={formik.values.materials?.references || ''}
-                onChange={(e) => formik.setFieldValue('materials.references', e.target.value)}
+                value={formik.values.materials?.references || ""}
+                onChange={(e) =>
+                  formik.setFieldValue("materials.references", e.target.value)
+                }
                 rows={2}
                 className="w-full"
               />
@@ -673,8 +800,10 @@ const EditCoursePage: React.FC = () => {
             <div>
               <label className="block text-sm font-medium mb-2">Phần mềm</label>
               <InputText
-                value={formik.values.materials?.software || ''}
-                onChange={(e) => formik.setFieldValue('materials.software', e.target.value)}
+                value={formik.values.materials?.software || ""}
+                onChange={(e) =>
+                  formik.setFieldValue("materials.software", e.target.value)
+                }
                 className="w-full"
               />
             </div>
@@ -684,7 +813,9 @@ const EditCoursePage: React.FC = () => {
         {/* Contents */}
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-700">Nội dung khóa học *</h2>
+            <h2 className="text-xl font-semibold text-gray-700">
+              Nội dung khóa học *
+            </h2>
             <Button
               type="button"
               icon={<FontAwesomeIcon icon={faPlus} />}
@@ -693,13 +824,15 @@ const EditCoursePage: React.FC = () => {
               className="p-button-sm"
             />
           </div>
-          
+
           {formik.values.contents.map((content, contentIdx) => (
             <div key={contentIdx} className="border rounded p-4 mb-4">
               <div className="flex gap-2 mb-3">
                 <InputText
                   value={content.title}
-                  onChange={(e) => updateContentTitle(contentIdx, e.target.value)}
+                  onChange={(e) =>
+                    updateContentTitle(contentIdx, e.target.value)
+                  }
                   className="flex-1"
                   placeholder="VD: Buổi 1"
                 />
@@ -725,12 +858,14 @@ const EditCoursePage: React.FC = () => {
                     size="small"
                   />
                 </div>
-                
+
                 {content.topics.map((topic, topicIdx) => (
                   <div key={topicIdx} className="flex gap-2 mb-2">
                     <InputText
                       value={topic}
-                      onChange={(e) => updateContentTopic(contentIdx, topicIdx, e.target.value)}
+                      onChange={(e) =>
+                        updateContentTopic(contentIdx, topicIdx, e.target.value)
+                      }
                       className="flex-1"
                       placeholder="Nhập chủ đề..."
                     />
@@ -748,7 +883,9 @@ const EditCoursePage: React.FC = () => {
             </div>
           ))}
           {formik.touched.contents && formik.errors.contents && (
-            <small className="text-red-500">{formik.errors.contents as string}</small>
+            <small className="text-red-500">
+              {formik.errors.contents as string}
+            </small>
           )}
         </div>
 
@@ -758,7 +895,7 @@ const EditCoursePage: React.FC = () => {
             type="button"
             label="Hủy"
             className="p-button-secondary"
-            onClick={() => router.push('/admin/courses')}
+            onClick={() => router.push("/admin/courses")}
           />
           <Button
             type="button"

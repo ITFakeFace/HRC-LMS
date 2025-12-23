@@ -18,6 +18,8 @@ import { EnrollmentsModule } from './enrollment/enrollments.module';
 import { SessionsModule } from './class-session/class-sessions.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { ImageModule } from './image/image.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
 @Module({
@@ -28,7 +30,14 @@ import { ImageModule } from './image/image.module';
       // Đảm bảo đường dẫn .env được load chính xác
       // envFilePath: ['.env'],
     }),
-
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'), 
+      
+      serveRoot: '/public', // URL prefix: localhost:3000/public/...
+      
+      // Tùy chọn: Tắt việc render index.html khi không tìm thấy file (để tránh lỗi ENOENT index.html gây hiểu nhầm)
+      renderPath: undefined,
+    }),
     // 2. Sau đó import PrismaModule
     PrismaModule,
     UsersModule,

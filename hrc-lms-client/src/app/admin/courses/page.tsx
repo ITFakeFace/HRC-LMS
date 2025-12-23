@@ -113,7 +113,7 @@ export default function CourseListPage() {
       <div className="flex justify-center items-center">
         {rowData.coverImage ? (
           <Image
-            src={rowData.coverImage}
+            src={"http://localhost:3000" + rowData.coverImage}
             alt={rowData.name}
             width="60"
             height="60"
