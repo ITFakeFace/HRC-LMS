@@ -6,6 +6,7 @@ import { ResponseCourseDto } from './dto/response-course.dto';
 import { Prisma } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { CoursesRepository } from './course.repository';
+import { PrismaService } from 'src/prisma/prisma.service'; // 1. IMPORT PRISMA SERVICE
 
 // Hàm helper tạo slug
 function generateSlug(str: string): string {
@@ -21,30 +22,29 @@ function generateSlug(str: string): string {
 
 @Injectable()
 export class CoursesService {
-  constructor(private readonly coursesRepository: CoursesRepository) {}
+  // 2. INJECT PRISMA SERVICE VÀO CONSTRUCTOR
+  constructor(
+    private readonly coursesRepository: CoursesRepository,
+    private readonly prisma: PrismaService 
+  ) {}
 
   // === 1. CREATE ===
-  // Thêm tham số imageUrl?: string vào cuối
   async create(createCourseDto: CreateCourseDto, userId: number, imageUrl?: string): Promise<ResponseCourseDto> {
     const res = new ResponseCourseDto();
 
-    // 1. Validate trùng Code
     const existingCode = await this.coursesRepository.findByCode(createCourseDto.code);
     if (existingCode) {
       res.pushError({ key: 'code', value: 'Mã khóa học đã tồn tại.' });
       return res;
     }
 
-    // 2. Xử lý Slug
     const rawSlug = generateSlug(createCourseDto.name);
     const existingSlug = await this.coursesRepository.findBySlug(rawSlug);
     const finalSlug = existingSlug ? `${rawSlug}-${Date.now()}` : rawSlug;
 
-    // 3. Chuẩn bị dữ liệu
-    // Lưu ý: coverImage trong DTO ta bỏ qua, ta dùng imageUrl được truyền từ Controller
     const { 
       categoryIds, 
-      coverImage: _, // Bỏ qua field này từ DTO
+      coverImage: _, 
       contents, objectives, audiences, requirements, schedule, locations, instructors, assessment, materials,
       ...restData 
     } = createCourseDto;
@@ -53,11 +53,7 @@ export class CoursesService {
       ...restData,
       slug: finalSlug,
       creator: { connect: { id: userId } },
-      
-      // QUAN TRỌNG: Lưu đường dẫn ảnh trực tiếp (String)
       coverImage: imageUrl || null,
-
-      // Xử lý JSON Arrays
       contents: contents as any,
       objectives: objectives as any,
       audiences: audiences as any,
@@ -65,12 +61,8 @@ export class CoursesService {
       schedule: schedule as any,
       locations: locations as any,
       instructors: instructors as any,
-      
-      // Xử lý JSON Objects
       assessment: assessment ? (assessment as any) : Prisma.JsonNull,
       materials: materials ? (materials as any) : Prisma.JsonNull,
-
-      // Xử lý quan hệ N:N với Categories
       categories: categoryIds && categoryIds.length > 0
         ? { connect: categoryIds.map((id) => ({ id })) }
         : undefined,
@@ -90,9 +82,6 @@ export class CoursesService {
   // === 2. FIND ALL ===
   async findAll(): Promise<CourseDto[]> {
     const courses = await this.coursesRepository.findAll();
-
-    // QUAN TRỌNG: Code bây giờ cực gọn, không cần map thủ công Buffer nữa
-    // plainToInstance sẽ tự map string -> string
     return plainToInstance(CourseDto, courses);
   }
 
@@ -111,18 +100,15 @@ export class CoursesService {
   }
 
   // === 4. UPDATE ===
-  // Thêm tham số imageUrl?: string vào cuối
   async update(id: number, updateCourseDto: UpdateCourseDto, userId: number, imageUrl?: string): Promise<ResponseCourseDto> {
     const res = new ResponseCourseDto();
 
-    // 1. Kiểm tra tồn tại
     const oldCourse = await this.coursesRepository.findById(id);
     if (!oldCourse) {
       res.pushError({ key: 'id', value: 'Khóa học không tồn tại.' });
       return res;
     }
 
-    // 2. Validate Code
     if (updateCourseDto.code && updateCourseDto.code !== oldCourse.code) {
         const checkCode = await this.coursesRepository.findByCode(updateCourseDto.code);
         if (checkCode) {
@@ -131,7 +117,6 @@ export class CoursesService {
         }
     }
 
-    // 3. Logic Slug
     let newSlug = "";
     if (updateCourseDto.name && updateCourseDto.name !== oldCourse.name) {
        const rawSlug = generateSlug(updateCourseDto.name);
@@ -143,19 +128,13 @@ export class CoursesService {
        }
     }
 
-    // 4. Chuẩn bị data update
-    // Bỏ qua coverImage từ DTO
     const { categoryIds, coverImage: _, ...restDto } = updateCourseDto;
 
     const updateData: Prisma.CourseUpdateInput = {
       ...restDto,
       editor: { connect: { id: userId } },
       ...(newSlug && { slug: newSlug }),
-      
-      // QUAN TRỌNG: Chỉ cập nhật ảnh nếu controller gửi xuống đường dẫn mới
       ...(imageUrl && { coverImage: imageUrl }),
-      
-      // Ép kiểu JSON
       ...(restDto.contents && { contents: restDto.contents as any }),
       ...(restDto.objectives && { objectives: restDto.objectives as any }),
       ...(restDto.audiences && { audiences: restDto.audiences as any }),
@@ -165,8 +144,6 @@ export class CoursesService {
       ...(restDto.instructors && { instructors: restDto.instructors as any }),
       ...(restDto.assessment && { assessment: restDto.assessment as any }),
       ...(restDto.materials && { materials: restDto.materials as any }),
-
-      // Xử lý Categories
       ...(categoryIds && {
         categories: {
           set: categoryIds.map((cid) => ({ id: cid })),
@@ -203,5 +180,82 @@ export class CoursesService {
     }
 
     return res;
+  }
+
+  // === 6. GET TEACHER SCHEDULE (MỚI THÊM) ===
+  /**
+   * Lấy lịch dạy của giảng viên
+   * Giả sử bạn có bảng 'Session' hoặc 'Lesson' liên kết với 'Course'
+   * Và Course có trường 'instructorId' hoặc 'teacherId'
+   */
+  async getTeacherSchedule(teacherId: number, fromDate: string, toDate: string) {
+    
+    // 1. Query bảng ClassSession
+    const sessions = await this.prisma.classSession.findMany({
+      where: {
+        // Điều kiện: Ngày nằm trong khoảng from-to
+        date: {
+          gte: new Date(fromDate),
+          lte: new Date(toDate),
+        },
+        // Điều kiện quan trọng: Lớp này phải do teacherId dạy
+        class: {
+          lecturerId: teacherId, 
+          // (Nếu muốn kỹ hơn: Lớp phải đang ACTIVE hoặc UPCOMING, không lấy CANCELED)
+          status: {
+            not: 'CANCELED' 
+          }
+        },
+      },
+      include: {
+        // Include để lấy tên Lớp và tên Khóa học
+        class: {
+          include: {
+            course: true, 
+          }
+        }
+      },
+      orderBy: {
+        date: 'asc', // Sắp xếp ngày tăng dần
+      },
+    });
+
+    // 2. Map dữ liệu sang format Client cần (giống HomeScreen.js)
+    return sessions.map((session) => {
+      // Format giờ: lấy từ DateTime session.startTime
+      // Lưu ý: startTime trong DB của bạn là DateTime, nên cần format ra HH:mm
+      const start = new Date(session.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      const end = new Date(session.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+      // Lấy địa điểm (Schema của bạn lưu location trong Course dạng JSON, 
+      // hoặc nếu chưa có chỗ lưu phòng cụ thể thì hardcode tạm)
+      // Tạm thời lấy location đầu tiên trong mảng Course.locations hoặc mặc định
+      let location = "Phòng Lab (Tầng 3)"; 
+      if (session.class.course.locations && Array.isArray(session.class.course.locations)) {
+          location = session.class.course.locations[0] as string;
+      }
+
+      return {
+        id: session.id,
+        // Tên hiển thị: Có thể là tên Lớp (React Native K18) hoặc tên Khóa học
+        className: session.class.name, 
+        courseName: session.class.course.name,
+        
+        date: session.date,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        
+        // Format chuỗi giờ để hiển thị ngay (nếu FE lười format)
+        timeString: `${start} - ${end}`,
+        
+        address: location,
+        
+        // Trạng thái buổi học (SCHEDULED, ONGOING, FINISHED)
+        sessionStatus: session.status,
+        
+        // Flag để Frontend biết buổi này đã mở điểm danh chưa
+        isAttendanceOpen: session.isAttendanceOpen
+      };
+    });
   }
 }
