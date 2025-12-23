@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Put,
+  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateAttendanceRecordDto } from './dto/update-attendance-record.dto';
@@ -19,32 +20,25 @@ import { AttendanceRecordsService } from './attendance-record.service';
 export class AttendanceRecordsController {
   constructor(private readonly recordsService: AttendanceRecordsService) {}
 
-  // 1. UPDATE RECORD (CHECK-IN)
-  @Put('session/:sessionId/student/:studentId')
+  // 1. SINH VIÊN QUÉT QR (CHECK-IN)
+  // PUT /attendance/records/check-in/session/:sessionId
+  @Put('check-in/session/:sessionId/student/:studentId')
   @HttpCode(HttpStatus.OK)
-  async update(
+  async checkIn(
     @Param('sessionId', ParseIntPipe) sessionId: number,
-    @Param('studentId', ParseIntPipe) studentId: number,
-    @Body() updateDto: UpdateAttendanceRecordDto,
+    @Param('studentId', ParseIntPipe) studentId: number, // <--- LẤY TỪ PARAM
   ): Promise<ResponseModel> {
-    const res = await this.recordsService.update(sessionId, studentId, updateDto);
+    
+    // Lưu ý: Logic check xem user đang login có phải là studentId này không 
+    // nên được xử lý ở Guard hoặc Service nếu cần bảo mật chặt chẽ.
+
+    const res = await this.recordsService.checkIn(sessionId, studentId);
 
     if (res.hasErrors()) {
-      // Nếu không tìm thấy record (do sai session hoặc student id) -> 404
-      if (res.errors.some((err) => err.key === 'global' && err.value.includes('Không tìm thấy'))) {
-         return new ResponseModel({
-          status: false,
-          statusCode: HttpStatus.NOT_FOUND,
-          message: 'Attendance record not found',
-          errors: res.errors,
-          data: null,
-        });
-      }
-
       return new ResponseModel({
         status: false,
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Attendance update failed',
+        message: 'Check-in Failed',
         errors: res.errors,
         data: null,
       });
@@ -53,24 +47,52 @@ export class AttendanceRecordsController {
     return new ResponseModel({
       status: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance recorded successfully',
+      message: 'Check-in Successful',
       data: res.record,
     });
   }
 
-  // 2. GET BY STUDENT IN CLASS
-  @Get('student/:studentId/class/:classId')
+  // 2. GIÁO VIÊN SỬA THỦ CÔNG
+  @Put('manual/session/:sessionId/student/:studentId')
   @HttpCode(HttpStatus.OK)
-  async findAllByStudent(
+  async updateManual(
+    @Param('sessionId', ParseIntPipe) sessionId: number,
     @Param('studentId', ParseIntPipe) studentId: number,
-    @Param('classId', ParseIntPipe) classId: number,
+    @Body() dto: UpdateAttendanceRecordDto,
   ): Promise<ResponseModel> {
-    const data = await this.recordsService.findAllByStudent(studentId, classId);
+    const res = await this.recordsService.updateManual(sessionId, studentId, dto);
+
+    if (res.hasErrors()) {
+      return new ResponseModel({
+        status: false,
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Update Failed',
+        errors: res.errors,
+        data: null,
+      });
+    }
 
     return new ResponseModel({
       status: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance records retrieved successfully',
+      message: 'Record updated manually',
+      data: res.record,
+    });
+  }
+
+  // 3. XEM LỊCH SỬ ĐIỂM DANH CỦA HỌC SINH TRONG LỚP
+  @Get('student/:studentId/class/:classId')
+  @HttpCode(HttpStatus.OK)
+  async getHistory(
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('classId', ParseIntPipe) classId: number,
+  ): Promise<ResponseModel> {
+    const data = await this.recordsService.findByStudentInClass(studentId, classId);
+
+    return new ResponseModel({
+      status: true,
+      statusCode: HttpStatus.OK,
+      message: 'History retrieved',
       data: data,
     });
   }

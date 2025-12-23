@@ -4,12 +4,14 @@ import {
   Post,
   Body,
   Param,
-  Delete,
   UseGuards,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
   Put,
+  Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
@@ -25,9 +27,8 @@ export class EnrollmentsController {
   // 1. CREATE
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createEnrollmentDto: CreateEnrollmentDto): Promise<ResponseModel> {
-    const res = await this.enrollmentsService.create(createEnrollmentDto);
-
+  async create(@Body() createDto: CreateEnrollmentDto): Promise<ResponseModel> {
+    const res = await this.enrollmentsService.create(createDto);
     if (res.hasErrors()) {
       return new ResponseModel({
         status: false,
@@ -37,25 +38,34 @@ export class EnrollmentsController {
         data: null,
       });
     }
-
     return new ResponseModel({
       status: true,
       statusCode: HttpStatus.CREATED,
-      message: 'Student enrolled successfully',
+      message: 'Enrolled successfully',
       data: res.enrollment,
     });
   }
 
-  // 2. GET BY STUDENT
-  @Get('student/:studentId')
+  // 2. QUERY: LỊCH HỌC CỦA TÔI (Quan trọng)
+  // GET /enrollments/my-schedule?fromDate=2023-10-01&toDate=2023-10-31
+  @Get('schedule') // Đổi tên route từ my-schedule -> schedule cho đúng ngữ nghĩa
   @HttpCode(HttpStatus.OK)
-  async findAllByStudent(@Param('studentId', ParseIntPipe) studentId: number): Promise<ResponseModel> {
-    const data = await this.enrollmentsService.findAllByStudent(studentId);
+  async getSchedule(
+    @Query('studentId', ParseIntPipe) studentId: number, // <--- LẤY TỪ QUERY
+    @Query('fromDate') fromDate: string,
+    @Query('toDate') toDate: string,
+  ): Promise<ResponseModel> {
+
+    if (!fromDate || !toDate) {
+      throw new BadRequestException('fromDate and toDate are required');
+    }
+
+    const data = await this.enrollmentsService.getMySchedule(studentId, fromDate, toDate);
 
     return new ResponseModel({
       status: true,
       statusCode: HttpStatus.OK,
-      message: 'Enrollments retrieved successfully',
+      message: 'Schedule retrieved successfully',
       data: data,
     });
   }
@@ -65,57 +75,22 @@ export class EnrollmentsController {
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateEnrollmentDto: UpdateEnrollmentDto,
+    @Body() dto: UpdateEnrollmentDto,
   ): Promise<ResponseModel> {
-    const res = await this.enrollmentsService.update(id, updateEnrollmentDto);
-
+    const res = await this.enrollmentsService.update(id, dto);
     if (res.hasErrors()) {
-      if (res.errors.some((err) => err.key === 'id')) {
-        return new ResponseModel({
-          status: false,
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Enrollment ID ${id} not found.`,
-          errors: res.errors,
-          data: null,
-        });
-      }
       return new ResponseModel({
         status: false,
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Update Enrollment Failed',
+        message: 'Update Failed',
         errors: res.errors,
         data: null,
       });
     }
-
     return new ResponseModel({
       status: true,
       statusCode: HttpStatus.OK,
-      message: `Enrollment ID ${id} updated successfully`,
-      data: res.enrollment,
-    });
-  }
-
-  // 4. DELETE
-  @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<ResponseModel> {
-    const res = await this.enrollmentsService.remove(id);
-
-    if (res.hasErrors()) {
-      return new ResponseModel({
-        status: false,
-        statusCode: HttpStatus.BAD_REQUEST, // Hoặc 404 tùy logic service
-        message: 'Cannot delete enrollment',
-        errors: res.errors,
-        data: null,
-      });
-    }
-
-    return new ResponseModel({
-      status: true,
-      statusCode: HttpStatus.OK,
-      message: `Enrollment ID ${id} deleted successfully`,
+      message: 'Enrollment updated',
       data: res.enrollment,
     });
   }

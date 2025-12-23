@@ -1,11 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-// Dữ liệu mẫu
+// =============================================================================
+// DATA DEFINITION
+// =============================================================================
+
 const rolesData = [
   { fullname: 'SUPER_ADMINISTRATOR', shortname: 'SUPER_ADMIN' },
   { fullname: 'TEACHER', shortname: 'TEACHER' },
-  { fullname: 'CUSTOMER', shortname: 'CUSTOMER' },
+  { fullname: 'STUDENT', shortname: 'STUDENT' },
 ];
 
 const permissionsData = [
@@ -31,8 +34,67 @@ const permissionsData = [
   { name: 'DELETE_COURSES', description: 'Xóa khóa học' },
 ];
 
+const teachersData = [
+  {
+    pID: 'GV001',
+    username: 'teacher1',
+    email: 'teacher1@hrc.com',
+    phone: '0901111111',
+    fullname: 'Nguyễn Thầy A',
+    gender: true, // Nam
+    dob: new Date('1985-05-15'),
+  },
+  {
+    pID: 'GV002',
+    username: 'teacher2',
+    email: 'teacher2@hrc.com',
+    phone: '0901111112',
+    fullname: 'Trần Cô B',
+    gender: false, // Nữ
+    dob: new Date('1990-10-20'),
+  },
+];
+
+const studentsData = [
+  {
+    pID: 'HV001',
+    username: 'student1',
+    email: 'student1@hrc.com',
+    phone: '0902222221',
+    fullname: 'Lê Học Trò 1',
+    gender: true, // Nam
+    dob: new Date('2003-01-01'),
+  },
+  {
+    pID: 'HV002',
+    username: 'student2',
+    email: 'student2@hrc.com',
+    phone: '0902222222',
+    fullname: 'Phạm Học Trò 2',
+    gender: false, // Nữ
+    dob: new Date('2003-06-15'),
+  },
+  {
+    pID: 'HV003',
+    username: 'student3',
+    email: 'student3@hrc.com',
+    phone: '0902222223',
+    fullname: 'Hoàng Học Trò 3',
+    gender: true, // Nam
+    dob: new Date('2004-12-25'),
+  },
+];
+
+// =============================================================================
+// MAIN SEEDER FUNCTION
+// =============================================================================
+
 export const seedAccounts = async (prisma: PrismaClient) => {
   console.log('--- SEEDING ACCOUNTS ---');
+
+  // Chuẩn bị Password chung cho User thường (Teacher/Student)
+  const commonPassword = '123456';
+  const hashedCommonPassword = await bcrypt.hash(commonPassword, 10);
 
   // 1. SEED ROLES
   console.log('1. Seeding Roles...');
@@ -99,5 +161,70 @@ export const seedAccounts = async (prisma: PrismaClient) => {
       },
     });
     console.log(`\t[✔] Admin user created: ${superAdminEmail}`);
+  }
+
+  // 5. SEED TEACHERS
+  console.log('5. Seeding Teachers...');
+  const teacherRole = await prisma.role.findUnique({ where: { shortname: 'TEACHER' } });
+  
+  if (teacherRole) {
+    for (const t of teachersData) {
+      await prisma.user.upsert({
+        where: { username: t.username }, // Check trùng username
+        update: {
+          // Update thông tin nếu muốn, hoặc để trống
+          roles: { connect: { id: teacherRole.id } },
+        },
+        create: {
+          pID: t.pID,
+          username: t.username,
+          email: t.email,
+          phone: t.phone,
+          password: hashedCommonPassword,
+          fullname: t.fullname,
+          gender: t.gender,
+          dob: t.dob,
+          isEmailVerified: true,
+          roles: {
+            connect: { id: teacherRole.id },
+          },
+        },
+      });
+    }
+    console.log(`\t[✔] Seeded ${teachersData.length} teachers.`);
+  } else {
+    console.warn(`\t[!] Role TEACHER not found.`);
+  }
+
+  // 6. SEED STUDENTS
+  console.log('6. Seeding Students...');
+  const studentRole = await prisma.role.findUnique({ where: { shortname: 'STUDENT' } });
+
+  if (studentRole) {
+    for (const s of studentsData) {
+      await prisma.user.upsert({
+        where: { username: s.username },
+        update: {
+          roles: { connect: { id: studentRole.id } },
+        },
+        create: {
+          pID: s.pID,
+          username: s.username,
+          email: s.email,
+          phone: s.phone,
+          password: hashedCommonPassword,
+          fullname: s.fullname,
+          gender: s.gender,
+          dob: s.dob,
+          isEmailVerified: true,
+          roles: {
+            connect: { id: studentRole.id },
+          },
+        },
+      });
+    }
+    console.log(`\t[✔] Seeded ${studentsData.length} students.`);
+  } else {
+    console.warn(`\t[!] Role STUDENT not found.`);
   }
 };

@@ -1,55 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAttendanceRecordDto } from './dto/create-attendance-record.dto'; // Thường ít dùng Create vì tạo tự động theo Session
 import { UpdateAttendanceRecordDto } from './dto/update-attendance-record.dto';
 import { AttendanceRecordDto } from './dto/attendance-record.dto';
 import { ResponseAttendanceRecordDto } from './dto/response-attendance-record.dto';
 import { AttendanceRecord } from '@prisma/client';
-import { AttendanceRepository } from './attendance.repository';
+import { AttendanceStatus } from '@prisma/client';
+import { AttendanceRecordRepository } from './attendance.repository';
 
 @Injectable()
 export class AttendanceRecordsService {
-  constructor(private readonly attendanceRepository: AttendanceRepository) {}
+  constructor(private readonly recordRepository: AttendanceRecordRepository) {}
 
-  // === UPDATE (Điểm danh: Có mặt, vắng...) ===
-  async update(
-    sessionId: number, 
-    studentId: number, 
-    updateDto: UpdateAttendanceRecordDto
-  ): Promise<ResponseAttendanceRecordDto> {
+  // === CHECK IN (Sinh viên quét QR) ===
+  async checkIn(sessionId: number, studentId: number): Promise<ResponseAttendanceRecordDto> {
     const res = new ResponseAttendanceRecordDto();
 
-    if (!updateDto.status) {
-      res.pushError({ key: 'status', value: 'Trạng thái điểm danh là bắt buộc.' });
-      return res;
-    }
-
     try {
-      const updatedRecord = await this.attendanceRepository.updateRecord(
-        sessionId,
-        studentId,
-        updateDto.status,
-        updateDto.note
-      );
-
+      const updatedRecord = await this.recordRepository.checkIn(sessionId, studentId);
       res.record = this.mapToDto(updatedRecord);
     } catch (error) {
-      console.error('Lỗi điểm danh:', error);
+      console.error('CheckIn Error:', error);
       if (error.code === 'P2025') {
         res.pushError({ 
           key: 'global', 
-          value: 'Không tìm thấy bản ghi điểm danh (Sai SessionID hoặc StudentID).' 
+          value: 'Không tìm thấy lượt điểm danh (Có thể lớp chưa bắt đầu hoặc bạn không có trong lớp).' 
         });
       } else {
-        res.pushError({ key: 'global', value: 'Lỗi hệ thống khi điểm danh.' });
+        res.pushError({ key: 'global', value: 'Lỗi khi điểm danh.' });
       }
     }
+    return res;
+  }
 
+  // === UPDATE MANUAL (Giáo viên sửa) ===
+  async updateManual(
+    sessionId: number, 
+    studentId: number, 
+    dto: UpdateAttendanceRecordDto
+  ): Promise<ResponseAttendanceRecordDto> {
+    const res = new ResponseAttendanceRecordDto();
+    
+    try {
+      const updated = await this.recordRepository.updateManual(
+        sessionId, 
+        studentId, 
+        dto.status || AttendanceStatus.PRESENT, 
+        dto.note
+      );
+      res.record = this.mapToDto(updated);
+    } catch (error) {
+      res.pushError({ key: 'global', value: 'Lỗi cập nhật điểm danh.' });
+    }
     return res;
   }
 
   // === FIND BY STUDENT IN CLASS ===
-  async findAllByStudent(studentId: number, classId: number): Promise<AttendanceRecordDto[]> {
-    const records = await this.attendanceRepository.getStudentRecordsInClass(studentId, classId);
+  async findByStudentInClass(studentId: number, classId: number): Promise<AttendanceRecordDto[]> {
+    const records = await this.recordRepository.findByStudentInClass(studentId, classId);
     return records.map(r => this.mapToDto(r));
   }
 
@@ -60,6 +66,7 @@ export class AttendanceRecordsService {
       stdId: data.stdId,
       status: data.status,
       note: data.note,
+      checkInAt: data.checkInAt,
     };
   }
 }
