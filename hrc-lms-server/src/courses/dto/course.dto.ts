@@ -55,7 +55,7 @@ export class CourseDto {
 
   // --- IMAGE & DATES (PHẦN QUAN TRỌNG ĐÃ SỬA) ---
   
-  @Expose({ name: 'cover_image' }) // Ánh xạ cột 'cover_image' trong DB sang biến này
+  @Expose() // Ánh xạ cột 'cover_image' trong DB sang biến này
   // Không cần @Transform convert Buffer nữa vì DB trả về string đường dẫn rồi
   coverImage: string | null; 
 

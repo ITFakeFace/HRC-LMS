@@ -117,7 +117,7 @@ export class CoursesController {
   // 4. UPDATE (PUT /courses/:id)
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('coverImage', createMulterOptions('courses'))) // Cho phép update ảnh mới
+  @UseInterceptors(FileInterceptor('coverImage', createMulterOptions('courses'))) 
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCourseDto: UpdateCourseDto,
@@ -126,13 +126,23 @@ export class CoursesController {
   ): Promise<ResponseModel> {
     const userId = req.user.id;
 
-    // --- XỬ LÝ ẢNH UPDATE ---
-    let imageUrl : string|null|undefined = undefined; // Mặc định undefined để Service biết là không update ảnh
+    // --- 🔴 DEBUG LOG (Thêm vào đây) ---
+    console.log('--- DEBUG UPDATE COURSE ---');
+    console.log('1. ID:', id);
+    console.log('2. Body Keys:', Object.keys(updateCourseDto)); // Xem có nhận được text không
+    console.log('3. File Object:', file); // QUAN TRỌNG: Nếu cái này là undefined -> Lỗi Frontend
+    // ------------------------------------
+
+    let imageUrl : string|null|undefined = undefined; 
+    
+    // Nếu file tồn tại thì mới tạo đường dẫn
     if (file) {
+        console.log('-> File detected! Filename:', file.filename);
         imageUrl = `/public/images/courses/${file.filename}`;
+    } else {
+        console.log('-> No file detected in request.');
     }
 
-    // Truyền imageUrl vào Service
     const res = await this.coursesService.update(id, updateCourseDto, userId, imageUrl);
 
     if (res.hasErrors()) {
