@@ -67,31 +67,39 @@ export class EnrollmentRepository {
       throw error;
     }
   }
-  
-  async getMySchedule(studentId: number, fromDate: Date, toDate: Date) {
-    return this.prisma.classSession.findMany({
-      where: {
-        // 1. Lọc theo ngày
-        date: { gte: fromDate, lte: toDate },
-        // 2. Lọc theo lớp mà user đang học
-        class: {
-          enrollments: {
-            some: {
-              studentId: studentId,
-              status: EnrollmentStatus.LEARNING,
+  // enrollment.repository.ts
+
+async getMySchedule(studentId: number, fromDate: Date, toDate: Date) {
+  return this.prisma.classSession.findMany({
+    where: {
+      date: { gte: fromDate, lte: toDate },
+      class: {
+        enrollments: {
+          some: {
+            studentId: studentId,
+            status: EnrollmentStatus.LEARNING,
+          },
+        },
+      },
+    },
+    include: {
+      class: {
+        include: {
+          lecturer: { // Tên quan hệ trong schema của bạn là 'lecturer'
+            select: {
+              fullname: true,
             },
           },
         },
       },
-      include: {
-        class: { select: { name: true, code: true } },
-        // 3. Kèm theo trạng thái điểm danh của chính user trong buổi đó
-        records: {
-          where: { stdId: studentId },
-          select: { status: true, checkInAt: true },
-        },
+      records: {
+        where: { stdId: studentId },
+        select: { status: true, checkInAt: true },
       },
-      orderBy: { date: 'asc' }, // Sắp xếp từ gần tới xa
-    });
-  }
+    },
+    orderBy: { date: 'asc' },
+  });
+}
+
+  
 }

@@ -56,18 +56,24 @@ export class ClassSessionsController {
     });
   }
 
-  // 3. START SESSION (Giáo viên bấm Start)
+  // ========================================================================
+  //                          QUẢN LÝ BUỔI HỌC
+  // ========================================================================
+
+  // 3. START SESSION (Bắt đầu lớp học - Chưa điểm danh)
   // POST /sessions/:id/start
   @Post(':id/start')
   @HttpCode(HttpStatus.OK)
   async startSession(
     @Param('id', ParseIntPipe) id: number,
-    @Body('openerId', ParseIntPipe) openerId: number // <--- ĐỔI TẠI ĐÂY
+    @Req() req: any, // 👈 SỬA: Lấy ID từ Token cho bảo mật
   ): Promise<ResponseModel> {
-    
+    const openerId = req.user.id; // Lấy ID giáo viên từ token
+
     const res = await this.sessionsService.startSession(id, openerId);
 
     if (res.hasErrors()) {
+      // Check lỗi logic cụ thể nếu cần
       return new ResponseModel({
         status: false,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -85,7 +91,62 @@ export class ClassSessionsController {
     });
   }
 
-  // 4. FINISH SESSION
+  // 4. OPEN ATTENDANCE (Mới thêm: Mở điểm danh + Sinh QR + Tạo record)
+  // POST /sessions/:id/attendance/open
+  @Post(':id/attendance/open')
+  @HttpCode(HttpStatus.OK)
+  async openAttendance(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any
+  ): Promise<ResponseModel> {
+    const teacherId = req.user.id;
+    
+    const res = await this.sessionsService.openAttendance(id, teacherId);
+
+    if (res.hasErrors()) {
+      return new ResponseModel({
+        status: false,
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Cannot open attendance',
+        errors: res.errors,
+        data: null,
+      });
+    }
+
+    return new ResponseModel({
+      status: true,
+      statusCode: HttpStatus.OK,
+      message: 'Attendance opened. QR Code generated.',
+      data: res.session, // Chứa attendanceCode
+    });
+  }
+
+  // 5. CLOSE ATTENDANCE (Mới thêm: Đóng điểm danh)
+  // POST /sessions/:id/attendance/close
+  @Post(':id/attendance/close')
+  @HttpCode(HttpStatus.OK)
+  async closeAttendance(@Param('id', ParseIntPipe) id: number): Promise<ResponseModel> {
+    const res = await this.sessionsService.closeAttendance(id);
+
+    if (res.hasErrors()) {
+      return new ResponseModel({
+        status: false,
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Cannot close attendance',
+        errors: res.errors,
+        data: null,
+      });
+    }
+
+    return new ResponseModel({
+      status: true,
+      statusCode: HttpStatus.OK,
+      message: 'Attendance closed.',
+      data: res.session,
+    });
+  }
+
+  // 6. FINISH SESSION (Kết thúc lớp học)
   // POST /sessions/:id/finish
   @Post(':id/finish')
   @HttpCode(HttpStatus.OK)
@@ -108,7 +169,7 @@ export class ClassSessionsController {
     });
   }
 
-  // 5. UPDATE MANUAL
+  // 7. UPDATE MANUAL
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   async update(

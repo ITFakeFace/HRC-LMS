@@ -19,7 +19,6 @@ import { ResponseModel } from 'src/response-model/model/response-model.model';
 import { ClassesService } from './class.service';
 
 @Controller('classes')
-@UseGuards(JwtAuthGuard)
 export class ClassesController {
   constructor(private readonly classesService: ClassesService) {}
 

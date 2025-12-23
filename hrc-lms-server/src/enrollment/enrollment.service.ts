@@ -11,7 +11,9 @@ export class EnrollmentsService {
   constructor(private readonly enrollmentRepository: EnrollmentRepository) {}
 
   // === CREATE ===
-  async create(createEnrollmentDto: CreateEnrollmentDto): Promise<ResponseEnrollmentDto> {
+  async create(
+    createEnrollmentDto: CreateEnrollmentDto,
+  ): Promise<ResponseEnrollmentDto> {
     const res = new ResponseEnrollmentDto();
 
     // 1. Check trùng
@@ -27,7 +29,8 @@ export class EnrollmentsService {
 
     // 2. Tạo mới
     try {
-      const newEnrollment = await this.enrollmentRepository.create(createEnrollmentDto);
+      const newEnrollment =
+        await this.enrollmentRepository.create(createEnrollmentDto);
       res.enrollment = this.mapToDto(newEnrollment);
     } catch (error) {
       console.error('Enrollment Error:', error);
@@ -38,15 +41,24 @@ export class EnrollmentsService {
   }
 
   // === UPDATE ===
-  async update(id: number, dto: UpdateEnrollmentDto): Promise<ResponseEnrollmentDto> {
+  async update(
+    id: number,
+    dto: UpdateEnrollmentDto,
+  ): Promise<ResponseEnrollmentDto> {
     const res = new ResponseEnrollmentDto();
     try {
       if (dto.status) {
-        const updated = await this.enrollmentRepository.updateStatus(id, dto.status);
+        const updated = await this.enrollmentRepository.updateStatus(
+          id,
+          dto.status,
+        );
         res.enrollment = this.mapToDto(updated);
       }
     } catch (error) {
-      res.pushError({ key: 'id', value: 'Không tìm thấy enrollment hoặc lỗi server.' });
+      res.pushError({
+        key: 'id',
+        value: 'Không tìm thấy enrollment hoặc lỗi server.',
+      });
     }
     return res;
   }
@@ -56,19 +68,24 @@ export class EnrollmentsService {
   async getMySchedule(studentId: number, fromDate: string, toDate: string) {
     const start = new Date(fromDate);
     const end = new Date(toDate);
-    
-    // Gọi Repository
-    const sessions = await this.enrollmentRepository.getMySchedule(studentId, start, end);
-    
-    // Map dữ liệu để FE dễ dùng
-    return sessions.map(s => ({
+
+    const sessions = await this.enrollmentRepository.getMySchedule(
+      studentId,
+      start,
+      end,
+    );
+
+    return sessions.map((s) => ({
+      id: s.id,
       date: s.date,
       startTime: s.startTime,
       endTime: s.endTime,
       className: s.class.name,
       classCode: s.class.code,
-      sessionTitle: s.title,
-      // Lấy trạng thái điểm danh của bản thân (nếu buổi đó đã bắt đầu)
+      sessionTitle: s.title || `Buổi số ${s.sessionNumber}`,
+      // Lấy tên giảng viên từ quan hệ lồng nhau
+      teacherName: s.class.lecturer?.fullname || 'Chưa phân công',
+      isAttendanceOpen: s.isAttendanceOpen,
       myAttendanceStatus: s.records.length > 0 ? s.records[0].status : null,
       myCheckInTime: s.records.length > 0 ? s.records[0].checkInAt : null,
     }));

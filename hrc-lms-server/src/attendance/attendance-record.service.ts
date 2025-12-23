@@ -10,22 +10,43 @@ import { AttendanceRecordRepository } from './attendance.repository';
 export class AttendanceRecordsService {
   constructor(private readonly recordRepository: AttendanceRecordRepository) {}
 
-  // === CHECK IN (Sinh viên quét QR) ===
-  async checkIn(sessionId: number, studentId: number): Promise<ResponseAttendanceRecordDto> {
+  // === CHECK IN (SỬA LẠI: Có Validate QR Code) ===
+  async checkIn(sessionId: number, studentId: number, code: string): Promise<ResponseAttendanceRecordDto> {
     const res = new ResponseAttendanceRecordDto();
 
+    // 1. Kiểm tra Session có đang mở và Code có đúng không
+    const session = await this.recordRepository.getSessionAuthInfo(sessionId);
+
+    if (!session) {
+      res.pushError({ key: 'sessionId', value: 'Buổi học không tồn tại.' });
+      return res;
+    }
+
+    if (!session.isAttendanceOpen) {
+      res.pushError({ key: 'global', value: 'Điểm danh đang đóng.' });
+      return res;
+    }
+
+    // 2. So sánh mã QR
+    if (session.attendanceCode !== code) {
+      res.pushError({ key: 'code', value: 'Mã QR không hợp lệ hoặc sai lớp.' });
+      return res;
+    }
+
+    // 3. Thực hiện điểm danh
     try {
       const updatedRecord = await this.recordRepository.checkIn(sessionId, studentId);
       res.record = this.mapToDto(updatedRecord);
     } catch (error) {
-      console.error('CheckIn Error:', error);
+      // P2025: Record to update not found
       if (error.code === 'P2025') {
         res.pushError({ 
           key: 'global', 
-          value: 'Không tìm thấy lượt điểm danh (Có thể lớp chưa bắt đầu hoặc bạn không có trong lớp).' 
+          value: 'Bạn không có tên trong danh sách lớp học này.' 
         });
       } else {
-        res.pushError({ key: 'global', value: 'Lỗi khi điểm danh.' });
+        console.error(error);
+        res.pushError({ key: 'global', value: 'Lỗi hệ thống khi điểm danh.' });
       }
     }
     return res;
@@ -59,6 +80,30 @@ export class AttendanceRecordsService {
     return records.map(r => this.mapToDto(r));
   }
 
+  // === 🆕 HÀM THỐNG KÊ ===
+  async getSessionStatistics(sessionId: number) {
+    const { stats, total } = await this.recordRepository.getSessionStatistics(sessionId);
+
+    // Format lại dữ liệu cho đẹp
+    let presentCount = 0;
+    let absentCount = 0;
+    let excusedCount = 0; // Có phép (nếu enum có)
+
+    stats.forEach(item => {
+      if (item.status === AttendanceStatus.PRESENT) presentCount = item._count.status;
+      if (item.status === AttendanceStatus.ABSENT) absentCount = item._count.status;
+      // if (item.status === 'EXCUSED') excusedCount = item._count.status;
+    });
+
+    return {
+      sessionId,
+      totalStudents: total,
+      attendedStudents: presentCount,
+      absentStudents: absentCount,
+      // attendanceRate: total > 0 ? (presentCount / total) * 100 : 0
+    };
+  }
+
   private mapToDto(data: AttendanceRecord): AttendanceRecordDto {
     return {
       id: data.id,
@@ -68,5 +113,11 @@ export class AttendanceRecordsService {
       note: data.note,
       checkInAt: data.checkInAt,
     };
+  }
+
+  async findAllBySession(sessionId: number) {
+    const records = await this.recordRepository.findAllBySession(sessionId);
+    // Có thể map lại DTO nếu cần, hoặc trả về raw luôn
+    return records;
   }
 }

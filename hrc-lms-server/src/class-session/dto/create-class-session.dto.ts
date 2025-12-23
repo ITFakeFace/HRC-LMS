@@ -1,6 +1,5 @@
-// Thường session được tạo tự động, nhưng DTO này dùng cho trường hợp tạo thủ công (Make-up class)
-import { IsInt, IsNotEmpty, IsDateString, IsString, IsOptional, IsEnum } from 'class-validator';
-import { SessionStatus } from '@prisma/client';
+import { IsInt, IsNotEmpty, IsDateString, IsString, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer'; // <--- Thêm cái này
 
 export class CreateClassSessionDto {
   @IsInt()
@@ -11,17 +10,20 @@ export class CreateClassSessionDto {
   @IsNotEmpty()
   sessionNumber: number;
 
+  // Dùng @Type để tự động convert string '2025-12-24' thành Date Object khi vào Service
   @IsDateString()
   @IsNotEmpty()
-  date: string; // YYYY-MM-DD
+  // @Type(() => Date) // Tùy chọn: Nếu Prisma của bạn field này là DateTime
+  date: string; 
 
   @IsDateString()
   @IsNotEmpty()
-  startTime: string; // ISO DateTime
+  // @Type(() => Date) // Nên mở nếu bạn muốn dùng các hàm ngày tháng trong service luôn
+  startTime: string; 
 
   @IsDateString()
   @IsNotEmpty()
-  endTime: string; // ISO DateTime
+  endTime: string; 
 
   @IsString()
   @IsOptional()
