@@ -12,7 +12,8 @@ import {
   HttpStatus,
   Req,
   UseInterceptors, // MỚI
-  UploadedFile,    // MỚI
+  UploadedFile,
+  Query,    // MỚI
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // MỚI
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -80,6 +81,25 @@ export class CoursesController {
     });
   }
 
+  // Phải đặt TRƯỚC @Get(':id') để tránh xung đột đường dẫn
+  @Get('teacher-schedule')
+  @HttpCode(HttpStatus.OK)
+  async getTeacherSchedule(
+    @Query('teacherId', ParseIntPipe) teacherId: number,
+    @Query('fromDate') fromDate: string,
+    @Query('toDate') toDate: string,
+  ): Promise<ResponseModel> {
+    // Gọi service đã viết ở bước trước
+    const data = await this.coursesService.getTeacherSchedule(teacherId, fromDate, toDate);
+    
+    return new ResponseModel({
+      status: true,
+      statusCode: HttpStatus.OK,
+      message: 'Teacher schedule retrieved successfully',
+      data: data,
+    });
+  }
+
   // 3. READ ONE (GET /courses/:id)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -113,6 +133,9 @@ export class CoursesController {
       data: res.course,
     });
   }
+
+  // --- 🔴 3. GET TEACHER SCHEDULE (MỚI THÊM) ---
+  
 
   // 4. UPDATE (PUT /courses/:id)
   @Put(':id')
