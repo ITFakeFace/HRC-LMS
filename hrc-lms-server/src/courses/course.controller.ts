@@ -11,12 +11,16 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseInterceptors, // MỚI
+  UploadedFile,    // MỚI
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express'; // MỚI
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { ResponseModel } from 'src/response-model/model/response-model.model';
-import { CoursesService } from './course.serivce';
+import { CoursesService } from './course.serivce'; // Check lại chính tả: course.service
+import { createMulterOptions } from 'src/image/multer.config'; // Import config Multer
 
 @Controller('courses')
 @UseGuards(JwtAuthGuard)
@@ -24,21 +28,31 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   // 1. CREATE (POST /courses)
+  // Phải dùng Interceptor để đọc form-data (kể cả khi không up ảnh thì DTO vẫn nằm trong form-data)
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('coverImage', createMulterOptions('courses'))) // Key là 'coverImage', lưu vào folder 'courses'
   async create(
     @Body() createCourseDto: CreateCourseDto,
     @Req() req: any,
+    @UploadedFile() file?: Express.Multer.File, // File có thể null
   ): Promise<ResponseModel> {
-    // Lấy ID user từ token (do JwtAuthGuard gán vào req.user)
     const userId = req.user.id;
+    
+    // --- XỬ LÝ ẢNH ---
+    let imageUrl = '';
+    if (file) {
+        // Tạo đường dẫn tĩnh để lưu vào DB
+        imageUrl = `/public/images/courses/${file.filename}`;
+    }
 
-    const res = await this.coursesService.create(createCourseDto, userId);
+    // Truyền imageUrl vào Service (Service đã sửa ở bước trước để nhận tham số thứ 3)
+    const res = await this.coursesService.create(createCourseDto, userId, imageUrl);
 
     if (res.hasErrors()) {
       return new ResponseModel({
         status: false,
-        statusCode: HttpStatus.BAD_REQUEST, // 400
+        statusCode: HttpStatus.BAD_REQUEST,
         message: 'Validation failed or creation error',
         errors: res.errors,
         data: null,
@@ -47,7 +61,7 @@ export class CoursesController {
 
     return new ResponseModel({
       status: true,
-      statusCode: HttpStatus.CREATED, // 201
+      statusCode: HttpStatus.CREATED,
       message: 'Course created successfully',
       data: res.course,
     });
@@ -57,12 +71,10 @@ export class CoursesController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<ResponseModel> {
-    // findAll của Service trả về mảng CourseDto[] trực tiếp
     const res = await this.coursesService.findAll();
-
     return new ResponseModel({
       status: true,
-      statusCode: HttpStatus.OK, // 200
+      statusCode: HttpStatus.OK,
       message: 'Courses retrieved successfully',
       data: res,
     });
@@ -75,18 +87,16 @@ export class CoursesController {
     const res = await this.coursesService.findOne(id);
 
     if (res.hasErrors()) {
-      // Ưu tiên check lỗi 404 (ID không tồn tại)
       if (res.errors.some((err) => err.key === 'id')) {
         return new ResponseModel({
           status: false,
-          statusCode: HttpStatus.NOT_FOUND, // 404
+          statusCode: HttpStatus.NOT_FOUND,
           message: `Course with ID ${id} not found.`,
           errors: res.errors,
           data: null,
         });
       }
 
-      // Các lỗi khác
       return new ResponseModel({
         status: false,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -98,7 +108,7 @@ export class CoursesController {
 
     return new ResponseModel({
       status: true,
-      statusCode: HttpStatus.OK, // 200
+      statusCode: HttpStatus.OK,
       message: `Course ID ${id} retrieved successfully`,
       data: res.course,
     });
@@ -107,18 +117,25 @@ export class CoursesController {
   // 4. UPDATE (PUT /courses/:id)
   @Put(':id')
   @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('coverImage', createMulterOptions('courses'))) // Cho phép update ảnh mới
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCourseDto: UpdateCourseDto,
     @Req() req: any,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<ResponseModel> {
-    // Lấy ID user để lưu vào lastEditor
     const userId = req.user.id;
 
-    const res = await this.coursesService.update(id, updateCourseDto, userId);
+    // --- XỬ LÝ ẢNH UPDATE ---
+    let imageUrl : string|null|undefined = undefined; // Mặc định undefined để Service biết là không update ảnh
+    if (file) {
+        imageUrl = `/public/images/courses/${file.filename}`;
+    }
+
+    // Truyền imageUrl vào Service
+    const res = await this.coursesService.update(id, updateCourseDto, userId, imageUrl);
 
     if (res.hasErrors()) {
-      // Check lỗi 404
       if (res.errors.some((err) => err.key === 'id')) {
         return new ResponseModel({
           status: false,
@@ -129,7 +146,6 @@ export class CoursesController {
         });
       }
 
-      // Lỗi validation khác (ví dụ trùng code, trùng slug)
       return new ResponseModel({
         status: false,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -141,7 +157,7 @@ export class CoursesController {
 
     return new ResponseModel({
       status: true,
-      statusCode: HttpStatus.OK, // 200
+      statusCode: HttpStatus.OK,
       message: `Course ID ${id} updated successfully`,
       data: res.course,
     });
@@ -154,7 +170,6 @@ export class CoursesController {
     const res = await this.coursesService.remove(id);
 
     if (res.hasErrors()) {
-      // Lỗi 404
       if (res.errors.some((err) => err.key === 'id')) {
         return new ResponseModel({
           status: false,
@@ -165,7 +180,6 @@ export class CoursesController {
         });
       }
 
-      // Lỗi khác (Ràng buộc dữ liệu)
       return new ResponseModel({
         status: false,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -177,7 +191,7 @@ export class CoursesController {
 
     return new ResponseModel({
       status: true,
-      statusCode: HttpStatus.OK, // 200
+      statusCode: HttpStatus.OK,
       message: `Course ID ${id} deleted successfully`,
       data: res.course,
     });

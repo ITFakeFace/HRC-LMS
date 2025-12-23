@@ -7,16 +7,16 @@ import { Prisma } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { CoursesRepository } from './course.repository';
 
-// Hàm helper tạo slug (có thể tách ra utils)
+// Hàm helper tạo slug
 function generateSlug(str: string): string {
   return str
     .toLowerCase()
-    .normalize('NFD') // Loại bỏ dấu tiếng Việt
+    .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[đĐ]/g, 'd')
-    .replace(/[^a-z0-9]/g, '-') // Thay ký tự lạ bằng dấu gạch ngang
-    .replace(/-+/g, '-') // Xóa gạch ngang thừa
-    .replace(/^-|-$/g, ''); // Cắt gạch ngang đầu cuối
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 @Injectable()
@@ -24,28 +24,27 @@ export class CoursesService {
   constructor(private readonly coursesRepository: CoursesRepository) {}
 
   // === 1. CREATE ===
-  async create(createCourseDto: CreateCourseDto, userId: number): Promise<ResponseCourseDto> {
+  // Thêm tham số imageUrl?: string vào cuối
+  async create(createCourseDto: CreateCourseDto, userId: number, imageUrl?: string): Promise<ResponseCourseDto> {
     const res = new ResponseCourseDto();
 
-    // 1. Validate: Kiểm tra trùng Code
+    // 1. Validate trùng Code
     const existingCode = await this.coursesRepository.findByCode(createCourseDto.code);
     if (existingCode) {
       res.pushError({ key: 'code', value: 'Mã khóa học đã tồn tại.' });
+      return res;
     }
 
-    if (res.hasErrors()) return res;
-
-    // 2. Xử lý Slug (SEO Friendly URL)
+    // 2. Xử lý Slug
     const rawSlug = generateSlug(createCourseDto.name);
     const existingSlug = await this.coursesRepository.findBySlug(rawSlug);
-    // Nếu trùng slug, thêm timestamp vào sau để unique
     const finalSlug = existingSlug ? `${rawSlug}-${Date.now()}` : rawSlug;
 
-    // 3. Chuẩn bị dữ liệu (Map DTO -> Prisma Input)
+    // 3. Chuẩn bị dữ liệu
+    // Lưu ý: coverImage trong DTO ta bỏ qua, ta dùng imageUrl được truyền từ Controller
     const { 
       categoryIds, 
-      coverImage, 
-      // Các trường JSON tách ra để map type
+      coverImage: _, // Bỏ qua field này từ DTO
       contents, objectives, audiences, requirements, schedule, locations, instructors, assessment, materials,
       ...restData 
     } = createCourseDto;
@@ -53,12 +52,12 @@ export class CoursesService {
     const prismaData: Prisma.CourseCreateInput = {
       ...restData,
       slug: finalSlug,
-      creator: { connect: { id: userId } }, // Link với User tạo
+      creator: { connect: { id: userId } },
       
-      // Xử lý ảnh: Base64 String -> Buffer
-      coverImage: coverImage ? Buffer.from(coverImage, 'base64') : null,
+      // QUAN TRỌNG: Lưu đường dẫn ảnh trực tiếp (String)
+      coverImage: imageUrl || null,
 
-      // Xử lý JSON Arrays (Ép kiểu as any để Prisma chấp nhận InputJsonValue)
+      // Xử lý JSON Arrays
       contents: contents as any,
       objectives: objectives as any,
       audiences: audiences as any,
@@ -89,9 +88,11 @@ export class CoursesService {
   }
 
   // === 2. FIND ALL ===
-  // Lưu ý: findAll thường trả về mảng trực tiếp, không bọc trong ResponseCourseDto (trừ khi bạn muốn phân trang phức tạp)
   async findAll(): Promise<CourseDto[]> {
     const courses = await this.coursesRepository.findAll();
+
+    // QUAN TRỌNG: Code bây giờ cực gọn, không cần map thủ công Buffer nữa
+    // plainToInstance sẽ tự map string -> string
     return plainToInstance(CourseDto, courses);
   }
 
@@ -110,7 +111,8 @@ export class CoursesService {
   }
 
   // === 4. UPDATE ===
-  async update(id: number, updateCourseDto: UpdateCourseDto, userId: number): Promise<ResponseCourseDto> {
+  // Thêm tham số imageUrl?: string vào cuối
+  async update(id: number, updateCourseDto: UpdateCourseDto, userId: number, imageUrl?: string): Promise<ResponseCourseDto> {
     const res = new ResponseCourseDto();
 
     // 1. Kiểm tra tồn tại
@@ -120,7 +122,7 @@ export class CoursesService {
       return res;
     }
 
-    // 2. Validate Code (nếu có sửa code)
+    // 2. Validate Code
     if (updateCourseDto.code && updateCourseDto.code !== oldCourse.code) {
         const checkCode = await this.coursesRepository.findByCode(updateCourseDto.code);
         if (checkCode) {
@@ -129,12 +131,11 @@ export class CoursesService {
         }
     }
 
-    // 3. Logic Slug (Nếu đổi tên -> đổi slug)
+    // 3. Logic Slug
     let newSlug = "";
     if (updateCourseDto.name && updateCourseDto.name !== oldCourse.name) {
        const rawSlug = generateSlug(updateCourseDto.name);
        const existingSlug = await this.coursesRepository.findBySlug(rawSlug);
-       // Nếu trùng slug với khóa học KHÁC (không phải chính nó)
        if (existingSlug && existingSlug.id !== id) {
          newSlug = `${rawSlug}-${Date.now()}`;
        } else {
@@ -143,17 +144,18 @@ export class CoursesService {
     }
 
     // 4. Chuẩn bị data update
-    const { categoryIds, coverImage, ...restDto } = updateCourseDto;
+    // Bỏ qua coverImage từ DTO
+    const { categoryIds, coverImage: _, ...restDto } = updateCourseDto;
 
     const updateData: Prisma.CourseUpdateInput = {
       ...restDto,
-      editor: { connect: { id: userId } }, // Cập nhật người sửa cuối
+      editor: { connect: { id: userId } },
       ...(newSlug && { slug: newSlug }),
       
-      // Xử lý ảnh (chỉ update nếu có gửi lên)
-      ...(coverImage && { coverImage: Buffer.from(coverImage, 'base64') }),
+      // QUAN TRỌNG: Chỉ cập nhật ảnh nếu controller gửi xuống đường dẫn mới
+      ...(imageUrl && { coverImage: imageUrl }),
       
-      // Ép kiểu JSON lại (Do DTO trả về object JS, Prisma cần InputJson)
+      // Ép kiểu JSON
       ...(restDto.contents && { contents: restDto.contents as any }),
       ...(restDto.objectives && { objectives: restDto.objectives as any }),
       ...(restDto.audiences && { audiences: restDto.audiences as any }),
@@ -164,7 +166,7 @@ export class CoursesService {
       ...(restDto.assessment && { assessment: restDto.assessment as any }),
       ...(restDto.materials && { materials: restDto.materials as any }),
 
-      // Xử lý Categories (Dùng set để thay thế toàn bộ danh mục cũ bằng danh mục mới)
+      // Xử lý Categories
       ...(categoryIds && {
         categories: {
           set: categoryIds.map((cid) => ({ id: cid })),
@@ -187,7 +189,6 @@ export class CoursesService {
   async remove(id: number): Promise<ResponseCourseDto> {
     const res = new ResponseCourseDto();
     
-    // Kiểm tra tồn tại trước
     const course = await this.coursesRepository.findById(id);
     if (!course) {
       res.pushError({ key: 'id', value: 'Khóa học không tồn tại.' });
@@ -196,9 +197,8 @@ export class CoursesService {
 
     try {
       await this.coursesRepository.delete(id);
-      res.course = plainToInstance(CourseDto, course); // Trả về data đã xóa
+      res.course = plainToInstance(CourseDto, course);
     } catch (error) {
-        // Lỗi thường gặp: Khóa ngoại (Ví dụ khóa học đang có học viên đăng ký...)
       res.pushError({ key: 'global', value: 'Không thể xóa khóa học này (có thể do ràng buộc dữ liệu).' });
     }
 

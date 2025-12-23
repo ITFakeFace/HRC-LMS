@@ -17,6 +17,7 @@ import { ClassesModule } from './class/classes.module';
 import { EnrollmentsModule } from './enrollment/enrollments.module';
 import { SessionsModule } from './class-session/class-sessions.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { ImageModule } from './image/image.module';
 
 
 @Module({
@@ -59,6 +60,7 @@ import { AttendanceModule } from './attendance/attendance.module';
     EnrollmentsModule,
     SessionsModule,
     AttendanceModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

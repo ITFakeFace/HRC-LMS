@@ -108,6 +108,7 @@ export default function CourseListPage() {
   };
 
   const imageBodyTemplate = (rowData: Course) => {
+    console.log('Cover Image Data:', rowData.coverImage);
     return (
       <div className="flex justify-center items-center">
         {rowData.coverImage ? (

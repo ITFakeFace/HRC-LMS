@@ -114,7 +114,7 @@ model Course {
   status      Int      @default(0) // 0: Draft, 1: Published
   description String?  @db.Text
   duration    String?  @db.VarChar(255)
-  coverImage  Bytes?   
+  coverImage  String?  
 
   // Flexible JSON Data
   objectives   Json     @map("objectives")

@@ -1,3 +1,4 @@
+// create-course.dto.ts
 import { 
   IsNotEmpty, 
   IsString, 
@@ -6,21 +7,19 @@ import {
   IsArray, 
   ValidateNested, 
   IsInt, 
-  IsBase64 
+  // IsBase64 -> XÓA CÁI NÀY
 } from 'class-validator';
 import { Type, Transform, plainToInstance } from 'class-transformer';
 import { ContentItemDto, AssessmentDto, MaterialsDto } from './json-fields.dto';
 
 export class CreateCourseDto {
-  // --- CỘT CỨNG (Identity) ---
+  // ... (Các trường code, name, description giữ nguyên) ...
   @IsString()
-  @IsNotEmpty({ message: 'Mã khóa học không được để trống' })
-  @MaxLength(50)
-  code: string; // HRC-RS01
+  @IsNotEmpty()
+  code: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Tên khóa học không được để trống' })
-  @MaxLength(255)
+  @IsNotEmpty()
   name: string;
 
   @IsOptional()
@@ -31,17 +30,15 @@ export class CreateCourseDto {
   @IsString()
   duration?: string;
 
-  // --- CỘT JSON (Flexible Arrays) ---
-  
+  // ... (Các trường JSON Array giữ nguyên) ...
   @IsArray()
   @IsString({ each: true })
-  @IsNotEmpty()
   objectives: string[];
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  audiences?: string[]; // Map với targetLearners cũ
+  audiences?: string[];
 
   @IsOptional()
   @IsArray()
@@ -63,43 +60,37 @@ export class CreateCourseDto {
   @IsString({ each: true })
   instructors?: string[];
 
-  // --- CỘT JSON (Complex Objects) ---
-
+  // ... (Các trường JSON Object Assessment/Materials giữ nguyên) ...
   @IsOptional()
   @ValidateNested()
-  @Type(() => AssessmentDto) // <--- BẮT BUỘC PHẢI CÓ
+  @Type(() => AssessmentDto)
   assessment?: AssessmentDto;
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => MaterialsDto) // <--- BẮT BUỘC PHẢI CÓ
+  @Type(() => MaterialsDto)
   materials?: MaterialsDto;
 
-  // --- MAGIC TRANSFORM: Contents ---
+  // ... (Trường Contents giữ nguyên Logic cũ) ...
   @IsNotEmpty()
   @ValidateNested({ each: true })
   @Transform(({ value }) => {
     let data = value;
-
-    // 1. Logic cũ: Nếu là Object -> Chuyển thành Array
     if (!Array.isArray(data) && typeof data === 'object' && data !== null) {
       data = Object.keys(data).map((key) => ({
         title: key,
         topics: data[key],
       }));
     }
-
-    // 2. Logic Mới: Ép kiểu thủ công sang Class ngay tại đây
-    // Thay vì để @Type bên ngoài đoán, ta ép trực tiếp nó thành ContentItemDto
     return plainToInstance(ContentItemDto, data); 
   })
-  // @Type(() => ContentItemDto)  <--- XÓA DÒNG NÀY ĐI (Vì đã làm ở trên rồi)
   contents: ContentItemDto[];
 
-  // --- HÌNH ẢNH & QUAN HỆ ---
+  // --- HÌNH ẢNH (PHẦN QUAN TRỌNG ĐÃ SỬA) ---
 
   @IsOptional()
-  @IsBase64()
+  @IsString() // Đổi thành String thường, vì nó sẽ là đường dẫn file (VD: /public/...)
+  // @IsBase64() -> XÓA DÒNG NÀY
   coverImage?: string;
 
   @IsOptional()

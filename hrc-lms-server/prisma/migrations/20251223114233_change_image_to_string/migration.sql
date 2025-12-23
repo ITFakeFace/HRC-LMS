@@ -77,7 +77,7 @@ CREATE TABLE `Courses` (
     `status` INTEGER NOT NULL DEFAULT 0,
     `description` TEXT NULL,
     `duration` VARCHAR(255) NULL,
-    `coverImage` LONGBLOB NULL,
+    `coverImage` VARCHAR(191) NULL,
     `objectives` JSON NOT NULL,
     `audiences` JSON NULL,
     `requirements` JSON NULL,
