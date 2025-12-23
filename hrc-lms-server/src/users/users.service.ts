@@ -170,161 +170,149 @@ export class UsersService {
     return res;
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<ResponseUserDto> {
-    const {
-      roles: newRoleIds,
-      password: newPassword,
-      ...userCoreData
-    } = updateUserDto;
-    const res = new ResponseUserDto();
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<ResponseUserDto> {
+  const { roles: newRoleIds, password: newPassword, ...userCoreData } = updateUserDto;
+  const res = new ResponseUserDto();
 
-    // 1. === KIỂM TRA USER TỒN TẠI ===
-    const existingUser = await this.userRepository.findById(id);
-    if (!existingUser) {
-      res.pushError({ key: 'id', value: `User ID ${id} không tồn tại.` });
-      return res;
-    }
-
-    // 2. === KIỂM TRA LỖI TRÙNG LẶP @unique ===
-    // Kiểm tra trùng lặp cho các trường @unique (email, username, pID) ngoại trừ chính User đang cập nhật
-
-    // Check Email
-    if (userCoreData.email) {
-      const existing = await this.userRepository.findByEmail(
-        userCoreData.email,
-      );
-      if (existing && existing.id !== id) {
-        res.pushError({
-          key: 'email',
-          value: 'Email đã được sử dụng bởi User khác.',
-        });
-      }
-    }
-
-    // Check Username (Giả định có hàm findByUsername trong UserRepository)
-    if (userCoreData.username) {
-      const existing = await this.userRepository.findByUsername(
-        userCoreData.username,
-      );
-      if (existing && existing.id !== id) {
-        res.pushError({
-          key: 'username',
-          value: 'Username đã được sử dụng bởi User khác.',
-        });
-      }
-    }
-
-    // Check pID (Giả định có hàm findByPID trong UserRepository)
-    if (userCoreData.pID) {
-      const existing = await this.userRepository.findByPID(userCoreData.pID);
-      if (existing && existing.id !== id) {
-        res.pushError({
-          key: 'pID',
-          value: 'Mã định danh pID đã được sử dụng bởi User khác.',
-        });
-      }
-    }
-
-    // 2b. === KIỂM TRA ROLE ID MỚI CÓ TỒN TẠI KHÔNG ===
-    if (newRoleIds && newRoleIds.length > 0) {
-      const targetRoles = await this.prisma.role.findMany({
-        where: { id: { in: newRoleIds } },
-        select: { id: true },
-      });
-
-      if (targetRoles.length !== newRoleIds.length) {
-        const foundIds = targetRoles.map((r) => r.id);
-        const missingIds = newRoleIds.filter((id) => !foundIds.includes(id));
-
-        res.pushError({
-          key: 'roles',
-          value: `Các Role ID [${missingIds.join(', ')}] không tồn tại.`,
-        });
-      }
-    }
-
-    if (res.errors.length > 0) {
-      return res; // Dừng nếu có lỗi validation
-    }
-
-    // 3. === CHUẨN BỊ DỮ LIỆU CẬP NHẬT USER CỐT LÕI ===
-    const updateData: Prisma.UserUpdateInput = {
-      ...userCoreData,
-      updatedAt: new Date(),
-    };
-
-    // Mã hóa mật khẩu mới nếu có
-    if (newPassword) {
-      updateData.password = await bcrypt.hash(newPassword, 10);
-    }
-    // Xử lý DateString nếu có
-    if (userCoreData.dob) {
-      updateData.dob = new Date(userCoreData.dob);
-    }
-
-    let updatedUser: any;
-
-    // 4. === THỰC HIỆN TRANSACTION (UPDATE User & Role) ===
-    try {
-      updatedUser = await this.prisma.$transaction(async (tx) => {
-        // a) Cập nhật thông tin cốt lõi của User
-        const user = await tx.user.update({
-          where: { id },
-          data: updateData,
-          include: { roles: true }, // Include roles để lấy thông tin Roles hiện tại
-        });
-
-        // b) XỬ LÝ ROLES (Nếu có newRoleIds trong DTO)
-        if (newRoleIds) {
-          // Lấy tất cả Role ID hiện tại của User
-          const currentRoleIds = user.roles.map((r) => r.id);
-
-          // Role cần thêm: Role mới mà User chưa có
-          const rolesToConnect = newRoleIds.filter(
-            (id) => !currentRoleIds.includes(id),
-          );
-          // Role cần xóa: Role hiện tại mà không có trong danh sách mới
-          const rolesToDisconnect = currentRoleIds.filter(
-            (id) => !newRoleIds.includes(id),
-          );
-
-          // Thực hiện kết nối và ngắt kết nối
-          await tx.user.update({
-            where: { id },
-            data: {
-              roles: {
-                connect: rolesToConnect.map((id) => ({ id })),
-                disconnect: rolesToDisconnect.map((id) => ({ id })),
-              },
-            },
-          });
-        }
-
-        // Trả về User đã được cập nhật hoàn chỉnh (với Roles mới)
-        return tx.user.findUnique({
-          where: { id },
-          include: { roles: true },
-        });
-      });
-
-      // 5. Trả về kết quả thành công
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password: _, ...userWithoutPassword } = updatedUser;
-      res.user = userWithoutPassword as any;
-    } catch (error) {
-      // 🚨 Bắt lỗi Prisma/DB (dù đã check, đây là lưới bắt cuối)
-      console.error('Lỗi khi cập nhật User:', error);
-      res.pushError({
-        key: 'global',
-        value: 'Lỗi không mong muốn trong quá trình cập nhật tài khoản.',
-      });
-    }
-
+  // 1) Check user tồn tại
+  const existingUser = await this.userRepository.findById(id);
+  if (!existingUser) {
+    res.pushError({ key: 'id', value: `User ID ${id} không tồn tại.` });
     return res;
   }
+
+  /**
+   * ✅ SANITIZE INPUT: loại bỏ null / empty string để Prisma không lỗi
+   * - Prisma field boolean không nhận null nếu schema không nullable
+   * - multipart/form-data thường đẩy "" lên, nên nên bỏ luôn
+   */
+  const sanitize = <T extends Record<string, any>>(obj: T) => {
+    for (const k of Object.keys(obj)) {
+      const v = obj[k];
+      if (v === undefined) continue;
+
+      // bỏ null
+      if (v === null) {
+        delete obj[k];
+        continue;
+      }
+
+      // bỏ string rỗng / toàn khoảng trắng
+      if (typeof v === 'string' && v.trim() === '') {
+        delete obj[k];
+        continue;
+      }
+    }
+    return obj;
+  };
+
+  sanitize(userCoreData);
+
+  // 2) Check trùng unique (chỉ check nếu field được gửi lên)
+  if (userCoreData.email) {
+    const existing = await this.userRepository.findByEmail(userCoreData.email);
+    if (existing && existing.id !== id) {
+      res.pushError({ key: 'email', value: 'Email đã được sử dụng bởi User khác.' });
+    }
+  }
+
+  if (userCoreData.username) {
+    const existing = await this.userRepository.findByUsername(userCoreData.username);
+    if (existing && existing.id !== id) {
+      res.pushError({ key: 'username', value: 'Username đã được sử dụng bởi User khác.' });
+    }
+  }
+
+  if (userCoreData.pID) {
+    const existing = await this.userRepository.findByPID(userCoreData.pID);
+    if (existing && existing.id !== id) {
+      res.pushError({ key: 'pID', value: 'Mã định danh pID đã được sử dụng bởi User khác.' });
+    }
+  }
+
+  // 2b) Check role ids (chỉ khi có truyền roles và có phần tử)
+  if (newRoleIds?.length) {
+    const targetRoles = await this.prisma.role.findMany({
+      where: { id: { in: newRoleIds } },
+      select: { id: true },
+    });
+
+    if (targetRoles.length !== newRoleIds.length) {
+      const foundIds = targetRoles.map((r) => r.id);
+      const missingIds = newRoleIds.filter((rid) => !foundIds.includes(rid));
+      res.pushError({
+        key: 'roles',
+        value: `Các Role ID [${missingIds.join(', ')}] không tồn tại.`,
+      });
+    }
+  }
+
+  if (res.errors.length > 0) return res;
+
+  // 3) Build updateData (không để null lọt vào Prisma)
+  const updateData: Prisma.UserUpdateInput = {
+    ...userCoreData,
+    updatedAt: new Date(),
+  };
+
+  // dob: string -> Date
+  if (userCoreData.dob) {
+    updateData.dob = new Date(userCoreData.dob);
+  }
+
+  // password hash nếu có
+  if (newPassword) {
+    updateData.password = await bcrypt.hash(newPassword, 10);
+  }
+
+  let updatedUser: any;
+
+  // 4) Transaction update
+  try {
+    updatedUser = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({
+        where: { id },
+        data: updateData,
+        include: { roles: true },
+      });
+
+      // roles update nếu roles được gửi lên (kể cả mảng rỗng => clear roles)
+      if (newRoleIds !== undefined) {
+        const currentRoleIds = user.roles.map((r) => r.id);
+
+        const rolesToConnect = (newRoleIds || []).filter((rid) => !currentRoleIds.includes(rid));
+        const rolesToDisconnect = currentRoleIds.filter((rid) => !(newRoleIds || []).includes(rid));
+
+        await tx.user.update({
+          where: { id },
+          data: {
+            roles: {
+              connect: rolesToConnect.map((rid) => ({ id: rid })),
+              disconnect: rolesToDisconnect.map((rid) => ({ id: rid })),
+            },
+          },
+        });
+      }
+
+      return tx.user.findUnique({
+        where: { id },
+        include: { roles: true },
+      });
+    });
+
+    const { password: _, ...userWithoutPassword } = updatedUser;
+    res.user = userWithoutPassword as any;
+  } catch (error) {
+    console.error('Lỗi khi cập nhật User:', error);
+    res.pushError({
+      key: 'global',
+      value: 'Lỗi không mong muốn trong quá trình cập nhật tài khoản.',
+    });
+  }
+
+  return res;
+}
+
 
   // // 5. DELETE
   async delete(id: number): Promise<ResponseUserDto> {
