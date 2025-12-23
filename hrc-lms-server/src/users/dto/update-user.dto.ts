@@ -9,6 +9,7 @@ import {
   IsInt,
   IsArray,
   ArrayUnique,
+  IsEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -40,6 +41,7 @@ export class UpdateUserDto {
   @MaxLength(100)
   fullname?: string;
 
+  @Type(() => Boolean)
   @IsOptional()
   @IsBoolean()
   gender?: boolean; // Đã có trong DTO cũ
@@ -69,7 +71,8 @@ export class UpdateUserDto {
   @MaxLength(255)
   password?: string;
 
+  @IsOptional()
   @IsArray({ message: 'Roles must be array of number' })
   @ArrayUnique({ message: 'Roles cannot be ' })
-  roles: number[];
+  roles?: number[] | null;
 }
