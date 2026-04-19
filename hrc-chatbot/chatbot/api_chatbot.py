@@ -239,23 +239,23 @@ def process_structured_response(structured_response: str, course_data: List[Dict
                             if actual_key == 'contents':
                                 content_list = []
                                 for session, topics in detail.items():
-                                    content_list.append(f"  - **{session.capitalize()}**:")
+                                    content_list.append(f"  - {session.capitalize()}:")
                                     content_list.append("    + " + "\n    + ".join(topics))
                                 detail_str = "\n" + "\n".join(content_list)
                             # Xử lý đánh giá (assessment)
                             elif actual_key == 'assessment':
-                                detail_str = "\n" + "\n".join([f"  - **{k.replace('_', ' ').capitalize()}**: {v}" for k, v in detail.items()])
+                                detail_str = "\n" + "\n".join([f"  - {k.replace('_', ' ').capitalize()}: {v}" for k, v in detail.items()])
                             else:
                                 detail_str = str(detail)
                         else:
                             # String/Number (ví dụ: tài liệu, thời lượng)
                             detail_str = str(detail)
                         
-                        final_answer_parts.append(f"**{info_type_vi.capitalize()}** của khóa học **{course_name} ({course_code})** là: {detail_str}")
+                        final_answer_parts.append(f"{info_type_vi.capitalize()} của khóa học {course_name} ({course_code}) là: {detail_str}")
                     else:
-                        final_answer_parts.append(f"⚠️ Thông tin '{info_type_vi}' (Key: '{actual_key}') không có sẵn cho khóa học **{course_name} ({course_code})**.")
+                        final_answer_parts.append(f"⚠️ Thông tin '{info_type_vi}' (Key: '{actual_key}') không có sẵn cho khóa học {course_name} ({course_code}).")
                 else:
-                    final_answer_parts.append(f"⚠️ Khóa học có mã **{course_code}** không tồn tại trong dữ liệu.")
+                    final_answer_parts.append(f"⚠️ Khóa học có mã*{course_code} không tồn tại trong dữ liệu.")
             
         if final_answer_parts:
             return "✅ " + "\n\n".join(final_answer_parts)

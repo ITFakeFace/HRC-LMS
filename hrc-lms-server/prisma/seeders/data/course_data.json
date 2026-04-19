@@ -1,0 +1,1205 @@
+[
+  {
+    "name": "Thu hút và tuyển chọn nhân sự",
+    "code": "HRC-RS01",
+    "coverImage": "\\public\\default\\images\\courses\\RS01.jpg",
+    "objectives": [
+      "Kiến thức cơ bản liên quan đến việc tuyển dụng nhân sự cho doanh nghiệp",
+      "Kiến thức về quy trình tuyển dụng nhân sự: lập kế hoạch, xây dựng nguồn tuyển và sàng lọc ứng viên",
+      "Kỹ năng xây dựng thương hiệu nhà tuyển dụng qua kỹ thuật SEO",
+      "Kỹ năng tuyển dụng nhân sự",
+      "Ứng dụng nhân tướng học, thần số học vào việc tuyển chọn ứng viên",
+      "Phân tích và nắm bắt tâm lý ứng viên trong quá trình phỏng vấn xin việc",
+      "Áp dụng các kiến thức, kỹ năng đã học vào tình huống phỏng vấn thực tế do giảng viên cung cấp"
+    ],
+    "audiences": [
+      "Người học trái nghề muốn theo nghề nhân sự nghiệp vụ tuyển dụng",
+      "Người học muốn củng cố kiến thức về nghiệp vụ tuyển dụng trong quản trị nhân sự",
+      "Người học muốn nâng cao kỹ năng tuyển dụng để phát triển sự nghiệp",
+      "Người học muốn tìm hiểu các vấn đề liên quan đến tâm lý học nhân sự và nghệ thuật nhìn người để ứng dụng trong việc nắm bắt tâm lý nhân viên trong tổ chức"
+    ],
+    "requirements": [
+      "Có hiểu biết về quản trị nhân sự tổng quan",
+      "Có thời gian, quyết tâm để ra nghề",
+      "Có nhu cầu tìm việc nghề quản lý nhân sự"
+    ],
+    "duration": "10 buổi, mỗi buổi 2.5 giờ",
+    "schedule": [
+      "Thứ 7 14h-16h30 và sáng CN 9h-11h30",
+      "Thứ 2, 4, 6 18h-20h30",
+      "Thứ 3, 5, 7 18h-20h30"
+    ],
+    "locations": [
+      "Tòa nhà Phương Nam education – 357 Lê Hồng Phong",
+      "Quang Trung, Q. Gò Vấp"
+    ],
+    "assessment": {
+      "part_exam": "Kiểm tra từng học phần: 30% (tạo thương hiệu nhà tuyển dụng, xây dựng nguồn tuyển, viết và đánh giá CV, kỹ thuật phỏng vấn ứng viên)",
+      "final_exam": "Kiểm tra cuối kỳ: 70% (bài trắc nghiệm, tự luận và tình huống phỏng vấn xin việc)"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về chính sách thu hút và tuyển dụng nhân sự",
+        "Quy trình tuyển dụng",
+        "Quan điểm tuyển chọn ứng viên",
+        "Các yếu tố xây dựng thương hiệu nhà tuyển dụng",
+        "Bài tập thực hành",
+        "Kiểm tra học phần"
+      ],
+      "buổi 2": [
+        "Lập kế hoạch tuyển dụng",
+        "Các yếu tố cần có trong lập kế hoạch tuyển dụng",
+        "Ngân sách tuyển dụng",
+        "Các pháp lý liên quan đến tuyển dụng",
+        "Nguồn tuyển dụng",
+        "Bài tập",
+        "Kiểm tra học phần"
+      ],
+      "buổi 3": [
+        "Xây dựng chính sách thu hút ứng viên",
+        "Phân tích công việc",
+        "Thiết kế quảng cáo tuyển dụng hiệu quả",
+        "Thực hành",
+        "Kiểm tra học phần"
+      ],
+      "buổi 4": [
+        "Kỹ năng viết CV ấn tượng",
+        "Kỹ năng đánh giá và sàn lọc CV",
+        "Thực hành",
+        "Kiểm tra học phần"
+      ],
+      "buổi 5-6-7": [
+        "Thuật nhìn người qua nhiều phương pháp",
+        "Thần số học",
+        "Bút tích, chiêm tinh học",
+        "Nhân tướng học",
+        "Tâm lý học ứng dụng"
+      ],
+      "buổi 8-9": [
+        "Các phương pháp tuyển chọn ứng viên",
+        "Các bước phỏng vấn ứng viên hiệu quả",
+        "Kỹ năng phỏng vấn ứng viên",
+        "Thực hành kỹ năng phỏng vấn ứng viên"
+      ],
+      "buổi 10": [
+        "Kiểm tra cuối kỳ",
+        "Cấp giấy chứng nhận, bảng điểm do HRC cấp"
+      ]
+    },
+    "materials": {
+      "mandatory": "Nguyễn Thanh Vân, Cẩm nang nghiệp vụ tuyển dụng, 2019, VNHURS edition (do HRC soạn thảo, cung cấp miễn phí)",
+      "references": "Tài liệu do giảng viên phụ trách cung cấp, đã qua kiểm định chất lượng của HRC",
+      "software": "PowerPoint, Word, Canva hoặc các phần mềm hỗ trợ viết CV"
+    },
+    "instructors": [
+      "Nguyễn Thanh Vân, MBA, 15 năm kinh nghiệm giảng dạy ngành Quản trị nhân sự"
+    ]
+  },
+  {
+    "name": "Quản trị chính sách lương và đãi ngộ toàn diện",
+    "code": "HRC-CB",
+    "objectives": [
+      "Kiến thức cơ bản liên quan đến việc trả lương cho người lao động tại doanh nghiệp",
+      "Kiến thức về pháp lý liên quan đến lao động như luật lao động, luật bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp, công đoàn, xử lý thôi việc…",
+      "Kỹ năng Excel, Power BI, Word liên quan đến việc trả lương và các thủ tục báo cáo nhân sự định kỳ",
+      "Vận dụng kiến thức đã học vào việc tính lương, trả lương và xây dựng chính sách đãi ngộ cho người lao động",
+      "Áp dụng các kiến thức, kỹ năng đã học vào tình huống và dữ liệu thực tế do giảng viên cung cấp"
+    ],
+    "audiences": [
+      "Người học trái nghề muốn theo nghề nhân sự nghiệp vụ trả lương và quan hệ lao động",
+      "Người học muốn củng cố kiến thức về nghiệp vụ trả lương trong quản trị nhân sự",
+      "Người học muốn nâng cao kỹ năng tính lương, thưởng, phúc lợi để phát triển sự nghiệp",
+      "Người học muốn tìm hiểu các vấn đề liên quan đến quản lý đãi ngộ người lao động để thiết kế phần mềm hệ thống quản lý nhân sự"
+    ],
+    "requirements": [
+      "Đã học qua khoá quản trị nhân sự tổng quan",
+      "Có máy laptop mang theo để thực hành tại chỗ học",
+      "Có máy tính tiền",
+      "Có thời gian, quyết tâm để ra nghề"
+    ],
+    "duration": "16 buổi, mỗi buổi 2.5 giờ",
+    "schedule": ["Thứ 7 14h-16h30 và sáng CN 9h-11h30", "Thứ 3, 5 18h-20h30"],
+    "locations": [
+      "Online: Trên nền tảng Zoom",
+      "Offline: Sư Vạn Hạnh, Quận 10"
+    ],
+    "assessment": {
+      "part_exam": "Kiểm tra từng học phần: 30% (pháp lý lao động, kỹ năng vi tính, bảng tính lương)",
+      "final_exam": "Kiểm tra cuối kỳ: 70% (bài trắc nghiệm, tự luận và bài tập bảng tính lương)"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về quản trị chính sách lương và đãi ngộ toàn diện",
+        "Quan điểm trả lương",
+        "Các yếu tố đãi ngộ toàn diện",
+        "Mô hình trả lương theo 3Ps"
+      ],
+      "buổi 2-3": [
+        "Pháp lý liên quan đến lao động tổng quan",
+        "Luật lao động: hợp đồng lao động, OT, thời gian làm việc, thời gian nghỉ ngơi",
+        "Luật lao động: phép năm, nghỉ có hưởng lương, nghỉ không hưởng lương",
+        "Luật lao động: phụ cấp trong lương và ngoài lương",
+        "Luật lao động: phụ cấp có và miễn đóng bảo hiểm",
+        "Luật lao động: các loại thu nhập miễn và có đóng thuế thu nhập cá nhân"
+      ],
+      "buổi 4-5": [
+        "Luật bảo hiểm xã hội và các chế độ liên quan",
+        "Luật bảo hiểm y tế",
+        "Luật bảo hiểm thất nghiệp",
+        "Luật thuế thu nhập cá nhân",
+        "Xử lý thôi việc và các vấn đề liên quan"
+      ],
+      "buổi 6": ["Kiểm tra học phần pháp lý liên quan đến lao động"],
+      "buổi 7-11": [
+        "Ứng dụng các hàm Excel căn bản trong việc trả lương: hàm lọc, hàm tìm, hàm chọn, hàm điều kiện…",
+        "Thực hành"
+      ],
+      "buổi 12-14": [
+        "Ứng dụng chức năng merge, mail merge trong Word",
+        "Ứng dụng Power BI trong báo cáo nhân sự định kỳ",
+        "Kiểm tra học phần kỹ năng vi tính trong nghiệp vụ trả lương"
+      ],
+      "buổi 15-16": [
+        "Thực hành bảng chấm công",
+        "Thực hành tính OT và các loại phép"
+      ],
+      "buổi 17-18": [
+        "Thực hành tính BHXH, BHYT, BHTN, phí công đoàn",
+        "Thực hành tính thuế thu nhập cá nhân"
+      ],
+      "buổi 19-20": [
+        "Thực hành lập bảng tính lương",
+        "Thực hành tính thưởng, thưởng theo thành tích, các loại thưởng"
+      ],
+      "buổi 22-23": [
+        "Thực hành bảng tính lương NET",
+        "Kiểm tra học phần bảng tính lương"
+      ],
+      "buổi 24": [
+        "Kiểm tra cuối kỳ",
+        "Cấp giấy chứng nhận, bảng điểm do HRC cấp"
+      ]
+    },
+    "coverImage": "\\public\\default\\images\\courses\\CB.jpg",
+    "materials": {
+      "mandatory": "Nguyễn Thanh Vân, Quản trị chính sách lương và đãi ngộ toàn diện, 2021, VNHURS edition (do HRC soạn thảo, cung cấp miễn phí)",
+      "references": "Tài liệu do giảng viên phụ trách cung cấp, đã qua kiểm định chất lượng của HRC",
+      "software": "Microsoft Excel, Power BI, Word"
+    },
+    "instructors": [
+      "Nguyễn Thanh Vân: MBA, 15 năm kinh nghiệm giảng dạy ngành Quản trị nhân sự",
+      "Đặng Quỳnh Mi: C&B Manager của Pepsico, hơn 10 năm công tác trả lương",
+      "Trương Đinh Hải Thụy: Tiến sỹ, Trưởng khoa Công nghệ thông tin"
+    ]
+  },
+  {
+    "name": "Nghệ thuật nhìn người và nắm bắt tâm lý người khác qua nhiều phương pháp",
+    "code": "HRC-P0",
+    "coverImage": "\\public\\default\\images\\courses\\P0.jpg",
+    "objectives": [
+      "Kiến thức cơ bản về quan điểm nhìn tướng và nắm bắt tâm lý người khác",
+      "Kỹ năng phân tích và nhìn nhận tính cách người khác qua nhiều phương pháp như: chữ viết, chữ ký, nhân tướng mặt, nhân tướng mệnh, tâm lý học nhân sự",
+      "Áp dụng các kiến thức đã học để thực hành tình huống thực tế"
+    ],
+    "audiences": [
+      "Người học muốn tìm hiểu về nhân tướng học căn bản",
+      "Người học muốn rèn luyện nâng cao kỹ năng nắm bắt tâm lý và tính cách người khác qua nhiều phương pháp",
+      "Người học muốn phát triển nghề nghiệp và thuận lợi trong việc giao tiếp với đối phương thông qua kỹ thuật đọc vị người khác"
+    ],
+    "requirements": ["Có niềm tin về nhân tướng học"],
+    "duration": "4 buổi, mỗi buổi 2.5 giờ",
+    "schedule": [
+      "Thứ 7 14h-16h30 và sáng CN 9h-11h30",
+      "Thứ 2, 4, 6 18h-20h30",
+      "Thứ 3, 5, 7 18h-20h30"
+    ],
+    "locations": [
+      "Tòa nhà Phương Nam education – 357 Lê Hồng Phong",
+      "Quang Trung, Q. Gò Vấp"
+    ],
+    "assessment": {
+      "method": "Khóa học này thực hành tại lớp học, không triển khai dạy online, và không kiểm tra kiến thức cuối khóa"
+    },
+    "contents": {
+      "buổi 1": [
+        "Quan điểm về thuật nhân tướng học",
+        "Ưu và nhược điểm của phương pháp nhân tướng học",
+        "Các tình huống thực tế dẫn chứng cho sự tồn tại của phương pháp nhân tướng học",
+        "Giới thiệu các phương pháp cần tìm hiểu",
+        "Phương pháp nhận diện con người qua chữ viết, chữ ký",
+        "Thực hành tại lớp học"
+      ],
+      "buổi 2": [
+        "Nhân tướng mặt",
+        "Các điểm nét trên gương mặt cần phân tích và nhận dạng",
+        "Thực hành tại lớp học"
+      ],
+      "buổi 3": [
+        "Nhân tướng mặt (tt)",
+        "Nhân tướng mệnh",
+        "Phân tích các tướng mệnh tiêu biểu",
+        "Thực hành tại lớp học"
+      ],
+      "buổi 4": [
+        "Phân tích và nắm bắt tâm lý con người qua ngôn ngữ hình thể",
+        "Phân tích tướng đi và tướng ngồi",
+        "Phân tích các biểu hiện tay chân",
+        "Thực hành phân tích clip để đọc suy nghĩ của nhân vật",
+        "Kiểm tra cuối kỳ, cấp giấy chứng nhận, bảng điểm do HRC cấp"
+      ]
+    },
+    "materials": {
+      "mandatory": "Nguyễn Thanh Vân, Tài liệu nhân tướng học ứng dụng, 2019, VNHURS edition (do HRC soạn thảo, cung cấp miễn phí)",
+      "references": "Tài liệu do giảng viên phụ trách cung cấp, đã qua kiểm định chất lượng của HRC",
+      "software": "Google, Internet, PowerPoint"
+    },
+    "instructors": [
+      "Nguyễn Thanh Vân, MBA, 15 năm kinh nghiệm giảng dạy ngành Quản trị nhân sự"
+    ]
+  },
+  {
+    "name": "Quản trị Đào tạo và Phát triển nguồn nhân lực (L&D)",
+    "code": "HRC-LD01",
+    "coverImage": "\\public\\default\\images\\courses\\LD01.jpg",
+    "objectives": [
+      "Hiểu rõ vai trò của L&D trong chiến lược phát triển doanh nghiệp",
+      "Kỹ năng phân tích nhu cầu đào tạo (TNA) chính xác",
+      "Kỹ năng thiết kế chương trình đào tạo theo mô hình ADDIE",
+      "Phương pháp đánh giá hiệu quả đào tạo theo mô hình Kirkpatrick",
+      "Xây dựng lộ trình thăng tiến và khung năng lực cho nhân viên"
+    ],
+    "audiences": [
+      "Chuyên viên đào tạo nội bộ muốn nâng cao nghiệp vụ",
+      "Quản lý nhân sự muốn xây dựng hệ thống L&D bài bản",
+      "Giảng viên nội bộ (Internal Trainer) muốn chuẩn hóa kỹ năng sư phạm"
+    ],
+    "requirements": [
+      "Có laptop cá nhân để thực hành thiết kế slide bài giảng",
+      "Đam mê công việc chia sẻ và phát triển con người"
+    ],
+    "duration": "8 buổi, mỗi buổi 2.5 giờ",
+    "schedule": ["Thứ 2, 4, 6 18h-20h30"],
+    "locations": ["Cơ sở Quận 3 - 123 Võ Văn Tần"],
+    "assessment": {
+      "part_exam": "Thực hành đứng lớp giảng dạy thử: 40%",
+      "final_exam": "Xây dựng kế hoạch đào tạo năm cho một doanh nghiệp giả định: 60%"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về L&D hiện đại",
+        "Phân biệt Training (Đào tạo), Education (Giáo dục) và Development (Phát triển)",
+        "Quy trình đào tạo chuẩn trong doanh nghiệp"
+      ],
+      "buổi 2": [
+        "Phân tích nhu cầu đào tạo (TNA - Training Needs Analysis)",
+        "Ba cấp độ phân tích: Tổ chức, Công việc, Cá nhân",
+        "Thực hành xây dựng bảng khảo sát nhu cầu đào tạo"
+      ],
+      "buổi 3-4": [
+        "Thiết kế chương trình đào tạo",
+        "Xây dựng mục tiêu đào tạo (Learning \"objectives\")",
+        "Soạn thảo tài liệu và giáo án (Lesson Plan)",
+        "Kỹ năng thiết kế Visual Aids (Slide Powerpoint)"
+      ],
+      "buổi 5": [
+        "Phương pháp giảng dạy tích cực",
+        "Kỹ năng điều phối lớp học (Facilitation Skills)",
+        "Xử lý các tình huống khó trong lớp học"
+      ],
+      "buổi 6": [
+        "Đánh giá hiệu quả đào tạo",
+        "Mô hình Kirkpatrick 4 cấp độ",
+        "Tính toán ROI trong đào tạo"
+      ],
+      "buổi 7": [
+        "Xây dựng khung năng lực (Competency Framework)",
+        "Lộ trình học tập (Learning Path) cho từng vị trí"
+      ],
+      "buổi 8": ["Thuyết trình đồ án cuối khóa", "Tổng kết và trao chứng nhận"]
+    },
+    "materials": {
+      "mandatory": "Giáo trình Quản trị Đào tạo HRC - 2024 Edition",
+      "references": "Sách \"The Art of Training\"",
+      "software": "PowerPoint, Canva, Kahoot"
+    },
+    "instructors": ["Lê Thị Minh Tâm, L&D Manager tập đoàn đa quốc gia"]
+  },
+  {
+    "name": "Xây dựng hệ thống KPIs và Quản trị hiệu suất (Performance Management)",
+    "code": "HRC-PM01",
+    "coverImage": "\\public\\default\\images\\courses\\PM01.jpg",
+    "objectives": [
+      "Hiểu đúng về BSC (Thẻ điểm cân bằng), KPI và OKR",
+      "Kỹ năng thiết lập mục tiêu SMART",
+      "Kỹ năng phân bổ chỉ tiêu từ công ty xuống phòng ban và cá nhân",
+      "Kỹ năng thực hiện phỏng vấn đánh giá thành tích (Appraisal Interview)",
+      "Xây dựng chính sách lương thưởng gắn liền với hiệu suất"
+    ],
+    "audiences": [
+      "Trưởng phòng nhân sự, CEO các doanh nghiệp vừa và nhỏ",
+      "Chuyên viên C&B muốn chuyên sâu về mảng quản trị thành tích"
+    ],
+    "requirements": [
+      "Hiểu biết cơ bản về cơ cấu tổ chức doanh nghiệp",
+      "Kỹ năng Excel khá"
+    ],
+    "duration": "10 buổi",
+    "schedule": ["Thứ 7, CN (Cả ngày)"],
+    "locations": ["Online qua Zoom", "Offline tại Sư Vạn Hạnh, Q.10"],
+    "assessment": {
+      "part_exam": "Bài tập xây dựng từ điển KPI: 30%",
+      "final_exam": "Xây dựng hệ thống BSC/KPI hoàn chỉnh cho 1 công ty: 70%"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tư duy đúng về quản trị hiệu suất",
+        "Phân biệt đánh giá năng lực và đánh giá thành tích",
+        "Tổng quan về BSC và KPI"
+      ],
+      "buổi 2-3": [
+        "Xây dựng bản đồ chiến lược (Strategy Map)",
+        "Thiết lập BSC cấp công ty",
+        "Thực hành xác định các mục tiêu chiến lược"
+      ],
+      "buổi 4-5": [
+        "Kỹ thuật xây dựng KPI",
+        "Từ điển KPI và cách thiết lập công thức đo lường",
+        "Phân bổ KPI xuống bộ phận và cá nhân"
+      ],
+      "buổi 6": [
+        "Tổng quan về OKR (\"objectives\" and Key Results)",
+        "Khi nào dùng KPI, khi nào dùng OKR?",
+        "Cách kết hợp KPI và OKR"
+      ],
+      "buổi 7": [
+        "Quy trình đánh giá thực hiện công việc",
+        "Kỹ năng phản hồi (Feedback) và Coaching nhân viên",
+        "Kỹ thuật phỏng vấn đánh giá cuối kỳ"
+      ],
+      "buổi 8": [
+        "Liên kết kết quả đánh giá với Lương, Thưởng và Đào tạo",
+        "Xử lý các trường hợp nhân viên không đạt KPI"
+      ],
+      "buổi 9": ["Thực hành trên phần mềm quản trị mục tiêu"],
+      "buổi 10": ["Bảo vệ đồ án tốt nghiệp"]
+    },
+    "materials": {
+      "mandatory": "Sách trắng về BSC & KPI của HRC",
+      "references": "KPI Mega Library",
+      "software": "Excel, Phần mềm KPI demo"
+    },
+    "instructors": ["Trần Văn Hùng, Chuyên gia tư vấn chiến lược nhân sự"]
+  },
+  {
+    "name": "Nghiệp vụ Hành chính Văn phòng chuyên nghiệp",
+    "code": "HRC-AD01",
+    "coverImage": "\\public\\default\\images\\courses\\AD01.jpg",
+    "objectives": [
+      "Chuẩn hóa kỹ năng soạn thảo văn bản hành chính",
+      "Kỹ năng quản lý con dấu, lưu trữ hồ sơ, văn thư lưu trữ",
+      "Kỹ năng tổ chức sự kiện, hội họp, tiếp khách",
+      "Quản lý tài sản, trang thiết bị và văn phòng phẩm"
+    ],
+    "audiences": [
+      "Sinh viên mới ra trường muốn làm nghề Hành chính - Nhân sự",
+      "Nhân viên lễ tân, thư ký muốn nâng cao nghiệp vụ"
+    ],
+    "requirements": ["Không yêu cầu kinh nghiệm"],
+    "duration": "6 buổi",
+    "schedule": ["Thứ 3, 5 18h30-21h"],
+    "locations": ["Cơ sở Gò Vấp"],
+    "assessment": {
+      "part_exam": "Soạn thảo văn bản hành chính: 50%",
+      "final_exam": "Xử lý tình huống quản trị hành chính: 50%"
+    },
+    "contents": {
+      "buổi 1": [
+        "Chức năng, nhiệm vụ của phòng Hành chính",
+        "Kỹ năng giao tiếp và lễ tân văn phòng",
+        "Tác phong chuyên nghiệp nơi công sở"
+      ],
+      "buổi 2": [
+        "Kỹ thuật soạn thảo văn bản hành chính theo Nghị định 30",
+        "Các loại văn bản thông dụng: Quyết định, Tờ trình, Thông báo, Công văn",
+        "Thực hành soạn thảo"
+      ],
+      "buổi 3": [
+        "Công tác văn thư lưu trữ",
+        "Quy trình quản lý công văn đi - đến",
+        "Quy định về quản lý và sử dụng con dấu",
+        "Sắp xếp hồ sơ khoa học (5S trong văn phòng)"
+      ],
+      "buổi 4": [
+        "Quản lý tài sản và cơ sở vật chất",
+        "Quy trình mua sắm, cấp phát văn phòng phẩm",
+        "Kiểm kê tài sản định kỳ"
+      ],
+      "buổi 5": [
+        "Kỹ năng tổ chức cuộc họp và sự kiện nội bộ",
+        "Lập biên bản cuộc họp",
+        "Tổ chức Year End Party, Teambuilding cơ bản"
+      ],
+      "buổi 6": ["Tổng kết và kiểm tra cuối khóa"]
+    },
+    "materials": {
+      "mandatory": "Cẩm nang Hành chính văn phòng HRC",
+      "references": "Nghị định 30/2020/NĐ-CP",
+      "software": "Word, Excel"
+    },
+    "instructors": [
+      "Cô Nguyễn Thị Bích Ngọc, Chánh văn phòng tập đoàn Bất động sản"
+    ]
+  },
+  {
+    "name": "HR Business Partner (HRBP) - Đối tác nhân sự chiến lược",
+    "code": "HRC-BP01",
+    "coverImage": "\\public\\default\\images\\courses\\BP01.jpg",
+    "objectives": [
+      "Chuyển đổi tư duy từ làm nhân sự hành chính sang đối tác chiến lược",
+      "Hiểu biết về kinh doanh (Business Acumen) để tư vấn cho các bộ phận",
+      "Kỹ năng quản trị sự thay đổi và giải quyết vấn đề con người trong tổ chức",
+      "Xây dựng kế hoạch nhân sự (Workforce Planning) bám sát mục tiêu kinh doanh"
+    ],
+    "audiences": [
+      "HR Manager, HR Generalist muốn chuyển hướng sang mô hình HRBP",
+      "Quản lý cấp trung muốn hiểu sâu về quản trị con người"
+    ],
+    "requirements": ["Có ít nhất 3 năm kinh nghiệm trong ngành nhân sự"],
+    "duration": "12 buổi",
+    "schedule": ["Sáng Thứ 7 hàng tuần (8h30 - 12h)"],
+    "locations": ["Khách sạn New World (Workshop Offline)"],
+    "assessment": {
+      "method": "Bảo vệ dự án tư vấn nhân sự trước hội đồng"
+    },
+    "contents": {
+      "buổi 1": [
+        "Mô hình Ulrich và sự tiến hóa của nghề nhân sự",
+        "Chân dung và năng lực cốt lõi của một HRBP"
+      ],
+      "buổi 2-3": [
+        "Tư duy kinh doanh (Business Acumen)",
+        "Cách đọc báo cáo tài chính cơ bản cho HR",
+        "Hiểu chuỗi giá trị (Value Chain) của doanh nghiệp"
+      ],
+      "buổi 4": [
+        "Hoạch định nguồn nhân lực chiến lược (Strategic Workforce Planning)",
+        "Dự báo cung cầu nhân lực"
+      ],
+      "buổi 5-6": [
+        "Quản trị nhân tài (Talent Management)",
+        "Xây dựng đội ngũ kế thừa (Succession Planning)",
+        "Chương trình Management Trainee"
+      ],
+      "buổi 7-8": [
+        "Kỹ năng tham vấn (Consulting Skills) cho Line Manager",
+        "Kỹ năng gây ảnh hưởng không cần chức danh"
+      ],
+      "buổi 9": [
+        "Quản trị sự thay đổi (Change Management)",
+        "Văn hóa doanh nghiệp trong giai đoạn chuyển đổi"
+      ],
+      "buổi 10": ["HR Analytics: Dùng dữ liệu để kể chuyện và thuyết phục"],
+      "buổi 11-12": [
+        "Trình bày dự án cuối khóa: Giải quyết một bài toán nhân sự thực tế"
+      ]
+    },
+    "materials": {
+      "mandatory": "Bộ toolkit HRBP Master",
+      "references": "Sách \"HR from the Outside In\"",
+      "software": "PowerBI, Visio"
+    },
+    "instructors": [
+      "Ông David Nguyễn, HR Director tập đoàn FMCG",
+      "Bà Phạm Lan Anh, Senior HRBP Manager khối Công nghệ"
+    ]
+  },
+  {
+    "name": "Pháp luật Lao động chuyên sâu và Xử lý quan hệ lao động",
+    "code": "HRC-LAW01",
+    "coverImage": "\\public\\default\\images\\courses\\LAW01.jpg",
+    "objectives": [
+      "Nắm vững Bộ luật Lao động 2019 và các văn bản hướng dẫn thi hành mới nhất",
+      "Kỹ năng soạn thảo Nội quy lao động, Thỏa ước lao động tập thể",
+      "Quy trình xử lý kỷ luật lao động đúng luật, tránh rủi ro kiện tụng",
+      "Kỹ năng giải quyết tranh chấp lao động và đình công"
+    ],
+    "audiences": [
+      "Chuyên viên C&B, chuyên viên quan hệ lao động (ER)",
+      "Pháp chế doanh nghiệp",
+      "Chủ doanh nghiệp muốn hạn chế rủi ro pháp lý"
+    ],
+    "requirements": ["Đã có kiến thức cơ bản về Luật lao động"],
+    "duration": "8 buổi",
+    "schedule": ["Thứ 2, 4 18h30-21h"],
+    "locations": ["Cơ sở Quận 3"],
+    "assessment": {
+      "final_exam": "Xử lý tình huống pháp lý (Case study) 100%"
+    },
+    "contents": {
+      "buổi 1": [
+        "Cập nhật các điểm mới của Bộ luật Lao động hiện hành",
+        "Giao kết hợp đồng lao động: Các loại HĐLĐ, phụ lục, thử việc",
+        "Rủi ro khi chấm dứt HĐLĐ trái pháp luật"
+      ],
+      "buổi 2": [
+        "Tiền lương, thời giờ làm việc và nghỉ ngơi",
+        "Quy định về làm thêm giờ (OT) và cách tính chuẩn"
+      ],
+      "buổi 3": [
+        "Xây dựng Nội quy lao động",
+        "Đăng ký nội quy lao động với cơ quan chức năng"
+      ],
+      "buổi 4-5": [
+        "Quy trình xử lý kỷ luật lao động",
+        "Nguyên tắc chứng minh lỗi",
+        "Trình tự họp xử lý kỷ luật",
+        "Sa thải nhân viên đúng luật"
+      ],
+      "buổi 6": [
+        "Thỏa ước lao động tập thể và Quy chế dân chủ cơ sở",
+        "Đối thoại định kỳ tại nơi làm việc"
+      ],
+      "buổi 7": [
+        "Giải quyết tranh chấp lao động",
+        "Vai trò của Công đoàn",
+        "Thủ tục tố tụng tại tòa án"
+      ],
+      "buổi 8": ["Thực hành diễn án: Phiên tòa giả định tranh chấp lao động"]
+    },
+    "materials": {
+      "mandatory": "Bộ luật Lao động 2019 & Các Nghị định hướng dẫn",
+      "references": "Các bản án lao động điển hình",
+      "software": "Thư viện pháp luật"
+    },
+    "instructors": ["Luật sư Trần Minh Hải, Đoàn Luật sư TP.HCM"]
+  },
+  {
+    "name": "Văn hóa Doanh nghiệp và Truyền thông nội bộ (IC)",
+    "code": "HRC-IC01",
+    "coverImage": "\\public\\default\\images\\courses\\IC01.jpg",
+    "objectives": [
+      "Hiểu rõ các cấp độ của văn hóa doanh nghiệp",
+      "Quy trình xây dựng và định hình văn hóa tổ chức",
+      "Kỹ năng lập kế hoạch truyền thông nội bộ hiệu quả",
+      "Tổ chức các hoạt động gắn kết nhân viên (Employee Engagement)"
+    ],
+    "audiences": [
+      "Chuyên viên truyền thông nội bộ (IC)",
+      "Cán bộ công đoàn, phụ trách văn hóa"
+    ],
+    "requirements": ["Khả năng viết lách tốt, sáng tạo"],
+    "duration": "6 buổi",
+    "schedule": ["Thứ 3, 5 18h30-21h"],
+    "locations": ["Online Zoom"],
+    "assessment": {
+      "final_exam": "Lập kế hoạch truyền thông cho một sự kiện nội bộ"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về Văn hóa doanh nghiệp",
+        "Mô hình tảng băng văn hóa",
+        "Tầm nhìn, Sứ mệnh và Giá trị cốt lõi"
+      ],
+      "buổi 2": [
+        "Các bước xây dựng và duy trì văn hóa",
+        "Văn hóa và hiệu suất kinh doanh"
+      ],
+      "buổi 3": [
+        "Truyền thông nội bộ (Internal Communication - IC)",
+        "Các kênh truyền thông nội bộ hiệu quả trong thời đại số"
+      ],
+      "buổi 4": [
+        "Kỹ năng viết và sáng tạo nội dung nội bộ",
+        "Làm newsletter, bảng tin, radio doanh nghiệp"
+      ],
+      "buổi 5": [
+        "Gắn kết nhân viên (Employee Engagement)",
+        "Tổ chức Townhall, Happy Hour, Teambuilding ý nghĩa"
+      ],
+      "buổi 6": [
+        "Xử lý khủng hoảng truyền thông nội bộ",
+        "Thuyết trình kế hoạch cuối khóa"
+      ]
+    },
+    "materials": {
+      "mandatory": "Sách \"Văn hóa doanh nghiệp - Từ Từ điển đến Hành động\"",
+      "references": "Các Case study văn hóa của Google, Netflix, FPT",
+      "software": "Canva, Mailchimp"
+    },
+    "instructors": ["Ths. Nguyễn Hữu Long, Chuyên gia tư vấn văn hóa"]
+  },
+  {
+    "name": "Phân tích dữ liệu nhân sự (HR Analytics) cơ bản",
+    "code": "HRC-DA01",
+    "coverImage": "\\public\\default\\images\\courses\\DA01.jpg",
+    "objectives": [
+      "Chuyển đổi tư duy quản trị nhân sự bằng dữ liệu",
+      "Nắm vững các chỉ số đo lường nhân sự (HR Metrics) quan trọng",
+      "Kỹ năng làm sạch và trực quan hóa dữ liệu nhân sự",
+      "Xây dựng Dashboard nhân sự tự động"
+    ],
+    "audiences": [
+      "Nhân viên C&B, HR Admin muốn hiện đại hóa báo cáo",
+      "HR Manager muốn ra quyết định dựa trên dữ liệu"
+    ],
+    "requirements": [
+      "Thành thạo Excel cơ bản",
+      "Có laptop cài Power BI Desktop (miễn phí)"
+    ],
+    "duration": "8 buổi",
+    "schedule": ["Chủ nhật hàng tuần"],
+    "locations": ["Phòng máy tính HRC Quận 10"],
+    "assessment": {
+      "final_exam": "Xây dựng HR Dashboard hoàn chỉnh trên Power BI"
+    },
+    "contents": {
+      "buổi 1": [
+        "Giới thiệu về People Analytics",
+        "Tại sao HR cần dữ liệu?",
+        "Các cấp độ trưởng thành của dữ liệu nhân sự"
+      ],
+      "buổi 2": [
+        "Hệ thống các chỉ số HR Metrics",
+        "Headcount, Turnover Rate, Retention Rate",
+        "Các chỉ số về tuyển dụng và đào tạo"
+      ],
+      "buổi 3": [
+        "Chuẩn hóa dữ liệu nhân sự",
+        "Kỹ thuật làm sạch dữ liệu với Excel (Power Query)"
+      ],
+      "buổi 4": [
+        "Giới thiệu Power BI",
+        "Kết nối dữ liệu từ Excel, Google Sheets vào Power BI"
+      ],
+      "buổi 5-6": [
+        "Xây dựng Dashboard nhân sự tổng hợp",
+        "Tạo các biểu đồ trực quan",
+        "Tạo các bộ lọc (Slicers) động"
+      ],
+      "buổi 7": [
+        "Phân tích sâu (Deep dive)",
+        "Phân tích nguyên nhân nghỉ việc",
+        "Dự báo chi phí nhân sự"
+      ],
+      "buổi 8": [
+        "Storytelling with Data - Kể chuyện bằng dữ liệu",
+        "Trình bày Dashboard cuối khóa"
+      ]
+    },
+    "materials": {
+      "mandatory": "Giáo trình HR Analytics thực chiến",
+      "references": "Dataset nhân sự mẫu",
+      "software": "Microsoft Excel, Power BI Desktop"
+    },
+    "instructors": ["Lê Thành Đạt, Data Analyst Lead"]
+  },
+  {
+    "name": "Thiết kế tổ chức và Xây dựng hệ thống Mô tả công việc (OD)",
+    "code": "HRC-OD01",
+    "coverImage": "\\public\\default\\images\\courses\\OD01.jpg",
+    "objectives": [
+      "Hiểu về cơ cấu tổ chức và sơ đồ tổ chức (Org Chart)",
+      "Kỹ năng phân tích và thiết kế công việc (Job Design)",
+      "Xây dựng hệ thống từ điển năng lực (Competency Dictionary)",
+      "Chuẩn hóa hệ thống Mô tả công việc (JD) theo chuẩn quốc tế"
+    ],
+    "audiences": [
+      "Trưởng phòng nhân sự muốn tái cấu trúc doanh nghiệp",
+      "Chuyên viên C&B, Tuyển dụng muốn hiểu sâu về thiết kế công việc"
+    ],
+    "requirements": ["Đã có kiến thức nền tảng về quản trị nhân sự"],
+    "duration": "8 buổi",
+    "schedule": ["Tối thứ 2, 4, 6 (18h30 - 21h00)"],
+    "locations": ["Cơ sở Quận 3"],
+    "assessment": {
+      "final_exam": "Dự án tái cấu trúc bộ phận và viết JD chuẩn"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về Thiết kế và Phát triển tổ chức (OD)",
+        "Các mô hình cơ cấu tổ chức phổ biến"
+      ],
+      "buổi 2-3": [
+        "Phân tích công việc (Job Analysis)",
+        "Quy trình thu thập thông tin công việc",
+        "Xây dựng ma trận phân quyền (RACI)"
+      ],
+      "buổi 4-5": [
+        "Kỹ thuật viết Mô tả công việc (JD) hiện đại",
+        "Xác định tiêu chuẩn công việc (Job Specification)",
+        "Thực hành viết JD cho các vị trí khó"
+      ],
+      "buổi 6-7": [
+        "Xây dựng Từ điển năng lực (Competency Framework)",
+        "Năng lực cốt lõi, năng lực chuyên môn và quản lý"
+      ],
+      "buổi 8": ["Đánh giá giá trị công việc (Job Evaluation) cơ bản"]
+    },
+    "materials": {
+      "mandatory": "Bộ mẫu JD chuẩn 100 vị trí",
+      "references": "Sách \"Organizational Design\"",
+      "software": "Visio, Excel"
+    },
+    "instructors": ["Ths. Trần Quốc Duy, OD Manager tập đoàn Bán lẻ"]
+  },
+  {
+    "name": "Chuyển đổi số trong Quản trị Nhân sự (Digital HR)",
+    "code": "HRC-DIG01",
+    "coverImage": "\\public\\default\\images\\courses\\DIG01.jpg",
+    "objectives": [
+      "Tư duy chuyển đổi số và ứng dụng công nghệ vào HR",
+      "Lựa chọn và triển khai hệ thống HRM/HRIS phù hợp",
+      "Ứng dụng AI và Chatgpt trong tuyển dụng và đào tạo",
+      "Xây dựng văn hóa số trong doanh nghiệp"
+    ],
+    "audiences": [
+      "HR Manager muốn số hóa quy trình",
+      "Chủ doanh nghiệp muốn tối ưu chi phí vận hành"
+    ],
+    "requirements": ["Tư duy mở, yêu thích công nghệ"],
+    "duration": "6 buổi",
+    "schedule": ["Thứ 7 (Cả ngày)"],
+    "locations": ["Online Zoom"],
+    "assessment": {
+      "final_exam": "Lập đề án chuyển đổi số cho phòng nhân sự"
+    },
+    "contents": {
+      "buổi 1": [
+        "Digital HR là gì? Tại sao phải chuyển đổi?",
+        "Các xu hướng HR Tech mới nhất"
+      ],
+      "buổi 2": [
+        "Quy trình lựa chọn phần mềm nhân sự (HRIS)",
+        "Các tiêu chí đánh giá Vendor"
+      ],
+      "buổi 3": [
+        "Ứng dụng AI trong tuyển dụng (Sàng lọc CV tự động)",
+        "Sử dụng Chatbot trả lời nhân viên"
+      ],
+      "buổi 4": [
+        "E-Learning và LMS (Hệ thống quản lý học tập)",
+        "Gamification (Game hóa) trong nhân sự"
+      ],
+      "buổi 5": [
+        "Quản trị dự án chuyển đổi số",
+        "Vượt qua rào cản tâm lý của nhân viên khi áp dụng công nghệ mới"
+      ],
+      "buổi 6": ["Demo các phần mềm HR phổ biến và Tổng kết"]
+    },
+    "materials": {
+      "mandatory": "Whitepaper về Digital HR Vietnam",
+      "references": "Tài liệu từ các Vendor phần mềm lớn",
+      "software": "ChatGPT, Base.vn (Demo), Lark Suite"
+    },
+    "instructors": ["Ông Nguyễn Văn Tuấn, CTO công ty công nghệ nhân sự"]
+  },
+  {
+    "name": "Kỹ năng Headhunting và Tuyển dụng cấp cao",
+    "code": "HRC-HUNT01",
+    "coverImage": "\\public\\default\\images\\courses\\HUNT01.jpg",
+    "objectives": [
+      "Phân biệt In-house Recruiter và Headhunter",
+      "Kỹ năng Sourcing ứng viên thụ động (Passive Candidates)",
+      "Kỹ năng Sales và đàm phán phí dịch vụ với khách hàng (Client)",
+      "Xây dựng thương hiệu cá nhân trên LinkedIn"
+    ],
+    "audiences": [
+      "Người muốn làm việc tại các Agency tuyển dụng (Headhunt Firm)",
+      "Chuyên viên tuyển dụng muốn nâng cao kỹ năng săn người"
+    ],
+    "requirements": ["Kỹ năng giao tiếp tốt", "Chịu được áp lực doanh số"],
+    "duration": "8 buổi",
+    "schedule": ["Thứ 3, 5 18h30-21h"],
+    "locations": ["Cơ sở Quận 10"],
+    "assessment": {
+      "part_exam": "Roleplay gọi điện telesale và cold call ứng viên",
+      "final_exam": "Lập kế hoạch hunting cho vị trí C-level (CEO/CFO)"
+    },
+    "contents": {
+      "buổi 1": [
+        "Nghề Headhunt: Cơ hội và Thách thức",
+        "Quy trình làm việc 360 độ của Consultant"
+      ],
+      "buổi 2-3": [
+        "Kỹ thuật Sourcing nâng cao (X-ray search, Boolean string)",
+        "Khai thác LinkedIn Recruiter hiệu quả"
+      ],
+      "buổi 4": [
+        "Tiếp cận ứng viên thụ động (Cold Calling/Cold Emailing)",
+        "Kỹ năng khơi gợi nhu cầu chuyển việc"
+      ],
+      "buổi 5": [
+        "Làm việc với Khách hàng (Client Management)",
+        "Phân tích JD và tư vấn thị trường"
+      ],
+      "buổi 6-7": [
+        "Kỹ năng phỏng vấn sâu (Deep Interview)",
+        "Kỹ năng đàm phán lương và chốt Offer (Closing deal)"
+      ],
+      "buổi 8": ["Xử lý từ chối (Objection Handling) và Counter-offer"]
+    },
+    "materials": {
+      "mandatory": "Sổ tay Headhunter thực chiến",
+      "references": "Mẫu hợp đồng dịch vụ Headhunt",
+      "software": "LinkedIn"
+    },
+    "instructors": ["Bà Jenny Phạm, Practice Leader tại Navigos Search"]
+  },
+  {
+    "name": "Tiếng Anh chuyên ngành Quản trị Nhân sự",
+    "code": "HRC-ENG01",
+    "coverImage": "\\public\\default\\images\\courses\\ENG01.jpg",
+    "objectives": [
+      "Nắm vững thuật ngữ tiếng Anh chuyên ngành HR",
+      "Kỹ năng phỏng vấn ứng viên bằng tiếng Anh",
+      "Viết email, báo cáo, quy trình nhân sự bằng tiếng Anh chuẩn",
+      "Đọc hiểu tài liệu, hợp đồng lao động quốc tế"
+    ],
+    "audiences": [
+      "Nhân viên nhân sự làm việc trong công ty đa quốc gia",
+      "Sinh viên muốn ứng tuyển vào các tập đoàn lớn"
+    ],
+    "requirements": ["Trình độ tiếng Anh căn bản (TOEIC > 450)"],
+    "duration": "12 buổi",
+    "schedule": ["Thứ 2, 4, 6 18h30-20h30"],
+    "locations": ["Cơ sở Gò Vấp"],
+    "assessment": {
+      "final_exam": "Mock Interview (Phỏng vấn thử) 1-1 bằng tiếng Anh"
+    },
+    "contents": {
+      "buổi 1-2": [
+        "HR Vocabulary: Recruitment & Selection",
+        "Writing Job Descriptions in English"
+      ],
+      "buổi 3-4": [
+        "Conducting Interviews in English",
+        "Common Interview Questions & Competency-based questions"
+      ],
+      "buổi 5-6": [
+        "HR Vocabulary: Training & Development",
+        "Compensation & Benefits Terminology"
+      ],
+      "buổi 7-8": [
+        "Labor Law & Contracts vocabulary",
+        "Writing HR Policies and Procedures"
+      ],
+      "buổi 9-10": [
+        "Business Email Writing for HR",
+        "Dealing with Employee Grievances (Roleplay)"
+      ],
+      "buổi 11-12": ["HR Meetings & Presentations", "Final \"assessment\""]
+    },
+    "materials": {
+      "mandatory": "Giáo trình English for Human Resources (Oxford)",
+      "references": "Cambridge Business English",
+      "software": "ELSA Speak (Hỗ trợ phát âm)"
+    },
+    "instructors": ["Ms. Emily Nguyen, HR Manager & TESOL Certified Teacher"]
+  },
+  {
+    "name": "Giám đốc Nhân sự Thực chiến (CHRO Master)",
+    "code": "HRC-CHRO01",
+    "coverImage": "\\public\\default\\images\\courses\\CHRO01.jpg",
+    "objectives": [
+      "Tư duy chiến lược nhân sự cấp cao",
+      "Kỹ năng quản trị tài chính dành cho HR",
+      "Xây dựng văn hóa và lãnh đạo tổ chức",
+      "Kỹ năng gây ảnh hưởng trong Ban giám đốc (Boardroom)"
+    ],
+    "audiences": [
+      "Trưởng phòng nhân sự muốn thăng tiến lên C-level",
+      "Giám đốc nhân sự các công ty vừa và nhỏ"
+    ],
+    "requirements": ["Kinh nghiệm quản lý nhân sự trên 5 năm"],
+    "duration": "16 buổi",
+    "schedule": ["Chủ nhật hàng tuần (8h30 - 16h30)"],
+    "locations": ["Resort ngoại ô (Kết hợp nghỉ dưỡng)"],
+    "assessment": {
+      "final_exam": "Bảo vệ chiến lược nhân sự 3-5 năm"
+    },
+    "contents": {
+      "buổi 1-2": [
+        "Vai trò của CHRO trong kỷ nguyên mới",
+        "Hoạch định chiến lược nguồn nhân lực"
+      ],
+      "buổi 3-4": [
+        "Tài chính dành cho Giám đốc nhân sự",
+        "Lập ngân sách và kiểm soát chi phí nhân sự"
+      ],
+      "buổi 5-6": [
+        "Quản trị nhân tài và Quy hoạch cán bộ nguồn",
+        "Xây dựng thương hiệu nhà tuyển dụng (Employer Branding) chiến lược"
+      ],
+      "buổi 7-8": [
+        "Quản trị văn hóa doanh nghiệp chuyên sâu",
+        "Lãnh đạo và Quản trị sự thay đổi"
+      ],
+      "buổi 9-10": [
+        "Pháp luật lao động dành cho quản lý cấp cao",
+        "Quản trị rủi ro nhân sự"
+      ],
+      "buổi 11-12": [
+        "Kỹ năng đàm phán và gây ảnh hưởng",
+        "Thuyết trình dự án tốt nghiệp"
+      ]
+    },
+    "materials": {
+      "mandatory": "Harvard Business Review on HR",
+      "references": "Sách \"Victory Through Organization\"",
+      "software": "Không yêu cầu"
+    },
+    "instructors": [
+      "Ông Hoàng Nam Tiến, Chủ tịch FPT Telecom (Khách mời)",
+      "Bà Tiêu Yến Trinh, CEO Talentnet (Khách mời)"
+    ]
+  },
+  {
+    "name": "Xây dựng hệ thống khung lương và đãi ngộ (Total Rewards)",
+    "code": "HRC-TR01",
+    "coverImage": "\\public\\default\\images\\courses\\TR01.jpg",
+    "objectives": [
+      "Phương pháp đánh giá giá trị công việc (Job Evaluation) theo chuẩn Mercer/Hay",
+      "Xây dựng hệ thống thang bảng lương (Salary Structure) 3P",
+      "Thiết kế gói phúc lợi cạnh tranh",
+      "Khảo sát lương thị trường (Salary Survey)"
+    ],
+    "audiences": [
+      "C&B Manager, HR Manager",
+      "Chuyên viên C&B muốn chuyên sâu về thiết kế hệ thống"
+    ],
+    "requirements": ["Thành thạo Excel, đã học qua lớp C&B cơ bản"],
+    "duration": "10 buổi",
+    "schedule": ["Thứ 2, 4, 6 18h30-21h"],
+    "locations": ["Cơ sở Quận 3"],
+    "assessment": {
+      "final_exam": "Xây dựng hệ thống thang bảng lương hoàn chỉnh"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về Total Rewards",
+        "Chiến lược trả lương: Dẫn đầu, Theo sau hay Cạnh tranh?"
+      ],
+      "buổi 2-3": [
+        "Đánh giá giá trị công việc (Job Evaluation)",
+        "Phương pháp chấm điểm (Point factor \"method\")",
+        "Thực hành chấm điểm vị trí"
+      ],
+      "buổi 4": ["Hệ thống ngạch bậc (Grading System)", "Phân ngạch chức danh"],
+      "buổi 5-6": [
+        "Xây dựng thang bảng lương (Salary Structure)",
+        "Thiết kế Min-Mid-Max, Spread, Range Overlap",
+        "Lương 3P (Position - Person - Performance)"
+      ],
+      "buổi 7": [
+        "Khảo sát lương thị trường",
+        "Cách đọc báo cáo lương của Mercer/Talentnet"
+      ],
+      "buổi 8": [
+        "Thiết kế hệ thống phúc lợi (Benefits)",
+        "Phúc lợi linh hoạt (Flexible Benefits)"
+      ],
+      "buổi 9-10": ["Quy chế lương thưởng", "Thực hành và Sửa bài tập lớn"]
+    },
+    "materials": {
+      "mandatory": "File Excel mẫu thiết kế lương tự động",
+      "references": "Báo cáo lương thị trường mới nhất",
+      "software": "Excel Advanced"
+    },
+    "instructors": ["Ông Lê Hồng Phúc, C&B Director"]
+  },
+  {
+    "name": "Trải nghiệm nhân viên (Employee Experience - EX)",
+    "code": "HRC-EX01",
+    "coverImage": "\\public\\default\\images\\courses\\EX01.jpg",
+    "objectives": [
+      "Hiểu sự khác biệt giữa Gắn kết nhân viên và Trải nghiệm nhân viên",
+      "Áp dụng tư duy thiết kế (Design Thinking) vào nhân sự",
+      "Vẽ bản đồ hành trình nhân viên (Employee Journey Map)",
+      "Tối ưu hóa các điểm chạm (Touchpoints) trong vòng đời nhân viên"
+    ],
+    "audiences": [
+      "HR Manager, IC, OD",
+      "Những người muốn đổi mới cách làm nhân sự"
+    ],
+    "requirements": ["Tư duy sáng tạo"],
+    "duration": "6 buổi",
+    "schedule": ["Thứ 7 (Cả ngày)"],
+    "locations": ["Không gian sáng tạo (Co-working space)"],
+    "assessment": {
+      "final_exam": "Thiết kế lại quy trình Onboarding theo tư duy EX"
+    },
+    "contents": {
+      "buổi 1": [
+        "Kỷ nguyên của Trải nghiệm nhân viên (EX)",
+        "Mối liên hệ giữa EX (Nhân viên) và CX (Khách hàng)"
+      ],
+      "buổi 2": [
+        "Tư duy thiết kế (Design Thinking) trong HR",
+        "Thấu cảm (Empathize) với nhân viên"
+      ],
+      "buổi 3-4": [
+        "Bản đồ hành trình nhân viên (Employee Journey Map)",
+        "Xác định những khoảnh khắc sự thật (Moments of Truth)",
+        "Thực hành vẽ bản đồ"
+      ],
+      "buổi 5": [
+        "Thiết kế trải nghiệm tại các điểm chạm: Tuyển dụng, Onboarding, Offboarding",
+        "Môi trường làm việc vật lý, văn hóa và công nghệ"
+      ],
+      "buổi 6": ["Đo lường hiệu quả EX (eNPS)", "Trình bày dự án nhóm"]
+    },
+    "materials": {
+      "mandatory": "Bộ công cụ Design Thinking for HR",
+      "references": "Sách \"The Employee Experience Advantage\"",
+      "software": "Miro (Bảng trắng online)"
+    },
+    "instructors": ["Bà Nguyễn Thu Hà, EX Manager công ty công nghệ"]
+  },
+  {
+    "name": "Kỹ năng Giải quyết xung đột và Đàm phán trong Nhân sự",
+    "code": "HRC-SKILL01",
+    "coverImage": "\\public\\default\\images\\courses\\SKILL01.jpg",
+    "objectives": [
+      "Nhận diện các loại xung đột trong tổ chức",
+      "Kỹ năng hòa giải và xử lý mâu thuẫn giữa nhân viên - nhân viên, nhân viên - sếp",
+      "Kỹ năng đàm phán lương với ứng viên",
+      "Kỹ năng đàm phán khi chấm dứt hợp đồng lao động"
+    ],
+    "audiences": ["Chuyên viên quan hệ lao động (ER)", "HRBP, Quản lý các cấp"],
+    "requirements": ["Không yêu cầu"],
+    "duration": "4 buổi",
+    "schedule": ["Chủ nhật (Sáng + Chiều)"],
+    "locations": ["Cơ sở Quận 10"],
+    "assessment": {
+      "final_exam": "Roleplay xử lý tình huống thực tế"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tâm lý học về xung đột",
+        "Các phong cách quản trị xung đột (Mô hình Thomas-Kilmann)"
+      ],
+      "buổi 2": [
+        "Quy trình hòa giải mâu thuẫn nội bộ",
+        "Kỹ năng lắng nghe thấu cảm và đặt câu hỏi"
+      ],
+      "buổi 3": [
+        "Nghệ thuật đàm phán lương (Win-Win)",
+        "Đọc vị tâm lý ứng viên khi deal lương"
+      ],
+      "buổi 4": [
+        "Đàm phán trong các tình huống khó: Sa thải, Cắt giảm nhân sự",
+        "Thực hành Roleplay"
+      ]
+    },
+    "materials": {
+      "mandatory": "Cẩm nang xử lý tình huống nhân sự khó",
+      "references": "Sách \"Crucial Conversations\"",
+      "software": "Không"
+    },
+    "instructors": ["Chuyên gia tâm lý học hành vi"]
+  },
+  {
+    "name": "Train The Trainer (TTT) - Kỹ năng giảng dạy chuyên nghiệp",
+    "code": "HRC-TTT01",
+    "coverImage": "\\public\\default\\images\\courses\\TTT01.jpg",
+    "objectives": [
+      "Chuẩn hóa kỹ năng đứng lớp và trình bày",
+      "Phương pháp biên soạn tài liệu giảng dạy khoa học",
+      "Kỹ năng dẫn giảng, điều phối và tạo năng lượng cho lớp học",
+      "Sử dụng thành thạo các công cụ hỗ trợ đào tạo"
+    ],
+    "audiences": [
+      "Giảng viên nội bộ (Internal Trainer)",
+      "Quản lý muốn đào tạo nhân viên",
+      "Bất cứ ai muốn trở thành diễn giả"
+    ],
+    "requirements": ["Tự tin, giọng nói rõ ràng"],
+    "duration": "8 buổi",
+    "schedule": ["Thứ 7, CN (2 tuần liên tiếp)"],
+    "locations": ["Cơ sở Quận 3 (Phòng học tiêu chuẩn)"],
+    "assessment": {
+      "final_exam": "Thực hành đứng lớp 15 phút/người có quay video đánh giá"
+    },
+    "contents": {
+      "buổi 1": [
+        "Chân dung nhà đào tạo chuyên nghiệp",
+        "Phong cách học tập của người lớn (Adult Learning)"
+      ],
+      "buổi 2": [
+        "Cấu trúc một bài giảng tiêu chuẩn (Mở bài - Thân bài - Kết bài)",
+        "Kỹ thuật soạn slide Powerpoint ấn tượng"
+      ],
+      "buổi 3": [
+        "Phi ngôn từ trong giảng dạy (Giọng nói, Dáng đứng, Mắt, Tay)",
+        "Cách di chuyển trong lớp học"
+      ],
+      "buổi 4": [
+        "Các phương pháp đào tạo hiện đại: Thảo luận nhóm, Roleplay, Gamification",
+        "Sử dụng Flipchart và máy chiếu"
+      ],
+      "buổi 5": [
+        "Kỹ năng đặt câu hỏi và dẫn dắt thảo luận",
+        "Xử lý các tình huống \"học viên khó đỡ\""
+      ],
+      "buổi 6-8": [
+        "Thực hành giảng dạy (Teach-back)",
+        "Nhận xét và sửa lỗi chi tiết từng người"
+      ]
+    },
+    "materials": {
+      "mandatory": "Workbook Train The Trainer",
+      "references": "Clip các diễn giả nổi tiếng",
+      "software": "PowerPoint"
+    },
+    "instructors": ["Master Trainer được chứng nhận quốc tế"]
+  },
+  {
+    "name": "Xây dựng quy trình nhân sự chuẩn ISO & SA8000",
+    "code": "HRC-ISO01",
+    "coverImage": "\\public\\default\\images\\courses\\ISO01.jpg",
+    "objectives": [
+      "Hiểu về các tiêu chuẩn quốc tế trong quản trị nhân sự (ISO 9001, SA8000)",
+      "Kỹ năng viết quy trình (SOP), biểu mẫu, hướng dẫn công việc",
+      "Kiểm soát tuân thủ và đánh giá nội bộ (Internal Audit)",
+      "Chuẩn bị hồ sơ đón đoàn đánh giá (Audit) của khách hàng"
+    ],
+    "audiences": [
+      "HR Manager nhà máy sản xuất",
+      "Chuyên viên tuân thủ (Compliance)",
+      "Thư ký ISO"
+    ],
+    "requirements": ["Làm việc trong môi trường sản xuất là lợi thế"],
+    "duration": "6 buổi",
+    "schedule": ["Chủ nhật hàng tuần"],
+    "locations": ["Online Zoom"],
+    "assessment": {
+      "final_exam": "Viết bộ quy trình tuyển dụng theo chuẩn ISO"
+    },
+    "contents": {
+      "buổi 1": [
+        "Tổng quan về hệ thống quản lý chất lượng ISO 9001:2015 áp dụng cho HR",
+        "Tiêu chuẩn trách nhiệm xã hội SA8000"
+      ],
+      "buổi 2": [
+        "Kỹ thuật viết quy trình (SOP) và lưu đồ (Flowchart)",
+        "Hệ thống biểu mẫu và kiểm soát hồ sơ"
+      ],
+      "buổi 3": ["Xây dựng quy trình Tuyển dụng & Đào tạo chuẩn ISO"],
+      "buổi 4": [
+        "Kiểm soát hồ sơ nhân sự, chấm công, tính lương để phục vụ Audit",
+        "Các lỗi thường gặp khi bị Audit"
+      ],
+      "buổi 5": [
+        "Đánh giá nội bộ (Internal Audit)",
+        "Quy trình khắc phục phòng ngừa (CAPA)"
+      ],
+      "buổi 6": ["Thực hành Audit chéo giữa các nhóm"]
+    },
+    "materials": {
+      "mandatory": "Bộ quy trình mẫu ISO phòng nhân sự",
+      "references": "Tiêu chuẩn SA8000",
+      "software": "Visio, Word"
+    },
+    "instructors": ["Chuyên gia tư vấn ISO/CSR"]
+  }
+]

@@ -1,8 +1,0 @@
-{
-  "devDependencies": {
-    "@types/multer": "^2.0.0"
-  },
-  "dependencies": {
-    "uuid": "^13.0.0"
-  }
-}

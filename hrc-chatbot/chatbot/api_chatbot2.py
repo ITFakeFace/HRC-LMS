@@ -8,11 +8,20 @@ from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import mysql.connector
 
 # --- 1. CẤU HÌNH & DATA MODEL ---
 MODEL = 'llama3.2'
 BASE_DIR = Path(__file__).resolve().parent
 FILE_PATH = BASE_DIR / "data" / "courses_data_v1.json"
+
+# Cấu hình Database MySQL
+DB_CONFIG = {
+    "host": "localhost",      # Thay đổi nếu host khác
+    "user": "root",           # Thay đổi user của bạn
+    "password": "DoThanhHung66@4",           # Thay đổi password của bạn
+    "database": "kltn_hrc_JS"
+}
 
 # Biến toàn cục lưu dữ liệu khóa học
 COURSE_DATA: List[Dict[str, Any]] = []
@@ -27,9 +36,16 @@ JSON_KEY_MAP = {
     "yêu cầu": "requirements",
     "tài liệu": "materials", 
     "thời lượng": "duration", 
-    "học phí": "tuition",
+    # "học phí": "tuition", # Tạm ẩn vì DB chưa có cột này
+    "tổng quan": "description", # Thêm cái này
+    "lịch học": "schedule"      # Thêm cái này
 }
 INFO_TYPES = list(JSON_KEY_MAP.keys())
+
+GLOBAL_CONTEXT = {
+    "COURSE_DATA": [],
+    "COURSE_SYSTEM_PROMPT": "" 
+}
 
 # --- 2. CÁC CLASS INPUT/OUTPUT ---
 
@@ -37,6 +53,7 @@ class ChatRequest(BaseModel):
     question: str
     # State hiện tại của việc đặt lịch (nếu client đang lưu), mặc định là rỗng
     booking_state: Optional[Dict[str, Any]] = None
+    forced_intent: Optional[str] = None
 
 class StandardResponse(BaseModel):
     target: Optional[str] # "tư vấn", "đặt lịch", hoặc null
@@ -58,6 +75,33 @@ def load_course_data():
     except Exception as e:
         print(f"❌ Lỗi tải data: {e}")
         return []
+    
+def load_course_data_from_db():
+    """[NEW] Tải dữ liệu từ MySQL thay vì file JSON"""
+    print("🔄 Connecting to MySQL to fetch courses...")
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT code, name, objectives, audiences, requirements, 
+                   materials, duration, description, schedule
+            FROM courses
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        print(f"✅ Fetched {len(rows)} active courses.")
+        return rows
+    except mysql.connector.Error as err:
+        print(f"❌ MySQL Error: {err}")
+        return []
+    except Exception as e:
+        print(f"❌ General Error: {e}")
+        return []
 
 def generate_course_system_prompt(data):
     """Tạo prompt cho bot Tư vấn (Component 1)"""
@@ -70,7 +114,7 @@ def generate_course_system_prompt(data):
         course_list_str += f"'{name}' (Mã: {code}); "
         valid_codes.append(code)
 
-    valid_codes_str = ", ".join([f"'{c}'" for c in valid_codes])
+    valid_codes_str = ", ".join([f"'{c}'" for c in valid_codes]) if valid_codes else "KHONG_CO_DU_LIEU"
     info_types_str = ", ".join([f"'{t}'" for t in INFO_TYPES])
     
     # Giữ nguyên prompt của bạn để đảm bảo tính nhất quán với Ollama
@@ -214,31 +258,41 @@ def call_ollama_json(model:str, system:str, user_query:str):
             model=model,
             prompt=user_query,
             system=system,
+            # format='json',
             options={
                 'temperature': 0.0, 
-                'num_ctx': 8192, # Đảm bảo context window đủ lớn
+                'num_ctx': 8192,
                 'seed': 6604,
-                'top_k': 1,  # <--- THÊM DÒNG NÀY (Giới hạn sự lựa chọn từ vựng)
+                'top_k': 1,
                 'top_p': 0.1
             }
         )
-        print("Response: "+response['response'])
-        return json.loads(response['response'])
+        
+        raw_text = response['response'].strip()
+        if not raw_text:
+            print("❌ Ollama trả về chuỗi rỗng!")
+            return None
+            
+        return json.loads(raw_text)
+
+    except json.JSONDecodeError:
+        print(f"❌ JSON Decode Error. Raw: {response.get('response', '')}")
+        return None
     except Exception as e:
-        print(f"Ollama Error: {e}")
+        print(f"❌ Ollama Error: {e}")
         return None
 
 # --- XỬ LÝ TƯ VẤN (Logic Component 1) ---
 def process_consultation(user_query):
-    """
-    Hàm này CHỈ gọi Ollama để lấy cấu trúc JSON [target, course].
-    KHÔNG viết lại thành câu trả lời tự nhiên.
-    """
-    # Gọi hàm đã định nghĩa system prompt chuyên bóc tách khóa học
-    # COURSE_SYSTEM_PROMPT cần đảm bảo trả về mảng JSON: [{"target": "...", "course": "..."}]
-    raw_json_data = call_ollama_json(MODEL, COURSE_SYSTEM_PROMPT, user_query)
-    # Trả về nguyên bản dữ liệu JSON (List hoặc Dict)
-    # Nếu lỗi hoặc None, trả về list rỗng [] để phía Client dễ xử lý
+    # [SỬA LỖI QUAN TRỌNG]: Phải dùng GLOBAL_CONTEXT["COURSE_SYSTEM_PROMPT"]
+    # Nếu dùng biến toàn cục cũ "COURSE_SYSTEM_PROMPT", nó vẫn là chuỗi rỗng "" vì logic update nằm trong hàm khác.
+    system_prompt = GLOBAL_CONTEXT.get("COURSE_SYSTEM_PROMPT", "")
+    
+    if not system_prompt:
+        print("⚠️ Warning: System prompt đang rỗng. Kiểm tra lại DB.")
+
+    raw_json_data = call_ollama_json(MODEL, system_prompt, user_query)
+    print("Extracted Consultation Data:", raw_json_data)
     return raw_json_data if raw_json_data is not None else []
 
 # --- XỬ LÝ ĐẶT LỊCH (Logic Component 3) ---
@@ -261,29 +315,37 @@ def process_booking(user_query, current_state):
             
     return new_state
 
+async def refresh_knowledge_base():
+    """Hàm update toàn bộ biến Global"""
+    data = load_course_data_from_db()
+    prompt = generate_course_system_prompt(data)
+    # print("New System Prompt:", prompt) # In 500 ký tự đầu của prompt để kiểm tra
+    # Cập nhật vào biến Global
+    GLOBAL_CONTEXT["COURSE_DATA"] = data
+    GLOBAL_CONTEXT["COURSE_SYSTEM_PROMPT"] = prompt
+    print(f"✅ Updated Knowledge Base with {len(data)} courses.")
+    return len(data)
+
 # --- 5. FASTAPI LIFESPAN & ENDPOINTS ---
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global COURSE_DATA, COURSE_SYSTEM_PROMPT
-    print("🚀 Loading Course Data...")
-    COURSE_DATA = load_course_data()
-    COURSE_SYSTEM_PROMPT = generate_course_system_prompt(COURSE_DATA)
-    print("✅ Ready.")
+    print("🚀 Starting Server & Loading Data...")
+    await refresh_knowledge_base() # Load lần đầu
     yield
     print("👋 Shutting down.")
 
 app = FastAPI(lifespan=lifespan)
 
+# [NEW] API để Refresh dữ liệu nóng
+@app.post("/system/refresh")
+async def refresh_data():
+    """Gọi API này khi Admin cập nhật/thêm khóa học mới"""
+    count = await refresh_knowledge_base()
+    return {"status": "success", "message": f"Reloaded {count} courses", "timestamp": datetime.now()}
+
 @app.post("/chat", response_model=StandardResponse)
 async def chat_endpoint(request: ChatRequest):
-    """
-    Output:
-    - Nếu là tư vấn: data = List[Dict] (Ví dụ: [{"target": "học phí", "course": "HRC-P0"}])
-    - Nếu là đặt lịch: data = Dict (State đặt lịch)
-    - Nếu null: data = String (Thông báo lỗi) hoặc Null
-    """
-    
     current_state = request.booking_state
     if current_state is None:
         current_state = {
@@ -291,27 +353,34 @@ async def chat_endpoint(request: ChatRequest):
             "time": None, "method": None, "destination": None
         }
 
-    # BƯỚC 1: ROUTING
-    router_res = call_ollama_json(MODEL, get_router_prompt(), request.question)
-    target = router_res.get('target') if router_res else None
-    
-    print(f"🔍 Intent detected: {target}")
+    target = None
 
-    # BƯỚC 2: BRANCHING
+    # --- BƯỚC 1: XÁC ĐỊNH TARGET (ROUTING HOẶC FORCED) ---
+    
+    # [NEW LOGIC] Nếu client ép buộc intent (ví dụ bấm nút "Đặt lịch ngay")
+    if request.forced_intent and request.forced_intent in ["tư vấn", "đặt lịch"]:
+        print(f"🚨 Forced Intent: {request.forced_intent}")
+        target = request.forced_intent
+    else:
+        # Nếu không ép buộc, dùng AI Router để đoán ý định
+        router_res = call_ollama_json(MODEL, get_router_prompt(), request.question)
+        target = router_res.get('target') if router_res else None
+        print(f"🔍 AI Router Intent: {target}")
+
+    # --- BƯỚC 2: XỬ LÝ THEO TARGET ---
     final_data = None
 
     if target == 'tư vấn':
         final_data = process_consultation(request.question)
         
     elif target == 'đặt lịch':
-        # Truyền current_state (đã được đảm bảo không null) vào
         final_data = process_booking(request.question, current_state)
         
     else:
-        target = None
+        target = None # Trường hợp AI trả về null hoặc intent rác
         final_data = None
-
-    # BƯỚC 3: RESPONSE
+    print(f"Final Response - Target: {target}, Data: {final_data}")
+    # --- BƯỚC 3: RESPONSE ---
     return {
         "target": target,
         "data": final_data

@@ -181,6 +181,9 @@ CREATE TABLE `ClientSessions` (
     `AIEnable` BOOLEAN NOT NULL DEFAULT true,
     `isEnded` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userId` INTEGER NULL,
+    `bookingState` JSON NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -188,7 +191,7 @@ CREATE TABLE `ClientSessions` (
 -- CreateTable
 CREATE TABLE `ChatContents` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `message` VARCHAR(255) NOT NULL,
+    `message` TEXT NOT NULL,
     `isRead` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `sessionId` INTEGER NOT NULL,
@@ -226,6 +229,23 @@ CREATE TABLE `ErrorReports` (
     `userId` INTEGER NOT NULL,
 
     INDEX `ErrorReports_userId_idx`(`userId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ConsultationBookings` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `fullname` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(50) NULL,
+    `email` VARCHAR(255) NULL,
+    `method` VARCHAR(50) NOT NULL,
+    `time` DATETIME(3) NOT NULL,
+    `destination` TEXT NULL,
+    `status` ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `adminNotes` TEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -294,6 +314,9 @@ ALTER TABLE `AttendanceRecords` ADD CONSTRAINT `AttendanceRecords_sessionId_fkey
 
 -- AddForeignKey
 ALTER TABLE `AttendanceRecords` ADD CONSTRAINT `AttendanceRecords_stdId_fkey` FOREIGN KEY (`stdId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ClientSessions` ADD CONSTRAINT `ClientSessions_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ChatContents` ADD CONSTRAINT `ChatContents_sessionId_fkey` FOREIGN KEY (`sessionId`) REFERENCES `ClientSessions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

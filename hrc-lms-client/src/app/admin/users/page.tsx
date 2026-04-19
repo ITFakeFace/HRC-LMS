@@ -174,10 +174,11 @@ export default function UsersListPage() {
   };
 
   const avatarTemplate = (rowData: UserWithFullAuth) => {
+    console.log("Row Data Avatar:", rowData);
     if (rowData.avatar) {
       return (
         <Avatar
-          image={rowData.avatar}
+          image={"http://localhost:3000" + rowData.avatar}
           size="large"
           shape="circle"
           className="border-2 border-gray-200"

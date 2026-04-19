@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { Toast } from 'primereact/toast';
-import { Image } from 'primereact/image';
-import { Tag } from 'primereact/tag';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook } from '@fortawesome/free-solid-svg-icons';
-import api from '@/src/api/api';
+import React, { useState, useEffect } from "react";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { Toast } from "primereact/toast";
+import { Image } from "primereact/image";
+import { Tag } from "primereact/tag";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBook } from "@fortawesome/free-solid-svg-icons";
+import api from "@/src/api/api";
 
 interface Category {
   id: number;
@@ -55,19 +55,19 @@ export default function CourseListPage() {
     try {
       setLoading(true);
       // Thay thế bằng api.get('/courses') trong project thực tế
-      const response = await api.get('/courses');
+      const response = await api.get("/courses");
       const result: ApiResponse = response.data;
-      
+
       if (result.status) {
         setCourses(result.data);
       }
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error("Error fetching courses:", error);
       toast.current?.show({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Không thể tải danh sách khóa học',
-        life: 3000
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể tải danh sách khóa học",
+        life: 3000,
       });
     } finally {
       setLoading(false);
@@ -87,28 +87,28 @@ export default function CourseListPage() {
       await api.delete(`/courses/${selectedCourse.id}`);
 
       toast.current?.show({
-        severity: 'success',
-        summary: 'Thành công',
-        detail: 'Đã xóa khóa học',
-        life: 3000
+        severity: "success",
+        summary: "Thành công",
+        detail: "Đã xóa khóa học",
+        life: 3000,
       });
 
-      setCourses(courses.filter(c => c.id !== selectedCourse.id));
+      setCourses(courses.filter((c) => c.id !== selectedCourse.id));
       setDeleteDialog(false);
       setSelectedCourse(null);
     } catch (error) {
-      console.error('Error deleting course:', error);
+      console.error("Error deleting course:", error);
       toast.current?.show({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Không thể xóa khóa học',
-        life: 3000
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể xóa khóa học",
+        life: 3000,
       });
     }
   };
 
   const imageBodyTemplate = (rowData: Course) => {
-    console.log('Cover Image Data:', rowData.coverImage);
+    console.log("Cover Image Data:", rowData.coverImage);
     return (
       <div className="flex justify-center items-center">
         {rowData.coverImage ? (
@@ -141,7 +141,9 @@ export default function CourseListPage() {
   const descriptionBodyTemplate = (rowData: Course) => {
     return (
       <div className="max-w-md">
-        <p className="text-sm text-gray-700 line-clamp-2">{rowData.description}</p>
+        <p className="text-sm text-gray-700 line-clamp-2">
+          {rowData.description}
+        </p>
       </div>
     );
   };
@@ -153,21 +155,25 @@ export default function CourseListPage() {
           icon="pi pi-eye"
           className="p-button-rounded p-button-info p-button-sm"
           tooltip="Chi tiết"
-          tooltipOptions={{ position: 'top' }}
-          onClick={() => window.location.href = `/admin/courses/${rowData.id}`}
+          tooltipOptions={{ position: "top" }}
+          onClick={() =>
+            (window.location.href = `/admin/courses/${rowData.id}`)
+          }
         />
         <Button
           icon="pi pi-pencil"
           className="p-button-rounded p-button-warning p-button-sm"
           tooltip="Chỉnh sửa"
-          tooltipOptions={{ position: 'top' }}
-          onClick={() => window.location.href = `/admin/courses/${rowData.id}/edit`}
+          tooltipOptions={{ position: "top" }}
+          onClick={() =>
+            (window.location.href = `/admin/courses/${rowData.id}/edit`)
+          }
         />
         <Button
           icon="pi pi-trash"
           className="p-button-rounded p-button-danger p-button-sm"
           tooltip="Xóa"
-          tooltipOptions={{ position: 'top' }}
+          tooltipOptions={{ position: "top" }}
           onClick={() => confirmDelete(rowData)}
         />
       </div>
@@ -194,15 +200,17 @@ export default function CourseListPage() {
   return (
     <div className="container mx-auto p-6">
       <Toast ref={toast} />
-      
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Danh sách khóa học</h1>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Danh sách khóa học
+          </h1>
           <Button
             label="Thêm khóa học"
             icon="pi pi-plus"
             className="p-button-success"
-            onClick={() => window.location.href = '/admin/courses/create'}
+            onClick={() => (window.location.href = "/admin/courses/create")}
           />
         </div>
 
@@ -222,48 +230,48 @@ export default function CourseListPage() {
             field="id"
             header="ID"
             sortable
-            style={{ width: '5%' }}
+            style={{ width: "5%" }}
             className="font-semibold"
           />
           <Column
             field="code"
             header="Mã khóa"
             sortable
-            style={{ width: '10%' }}
+            style={{ width: "10%" }}
           />
           <Column
             header="Hình đại diện"
             body={imageBodyTemplate}
-            style={{ width: '10%' }}
+            style={{ width: "10%" }}
           />
           <Column
             field="name"
             header="Tên khóa học"
             sortable
-            style={{ width: '20%' }}
+            style={{ width: "20%" }}
             className="font-medium"
           />
           <Column
             header="Thể loại"
             body={categoryBodyTemplate}
-            style={{ width: '15%' }}
+            style={{ width: "15%" }}
           />
           <Column
             header="Mô tả"
             body={descriptionBodyTemplate}
-            style={{ width: '25%' }}
+            style={{ width: "25%" }}
           />
           <Column
             header="Hành động"
             body={actionBodyTemplate}
-            style={{ width: '15%' }}
+            style={{ width: "15%" }}
           />
         </DataTable>
       </div>
 
       <Dialog
         visible={deleteDialog}
-        style={{ width: '450px' }}
+        style={{ width: "450px" }}
         header="Xác nhận xóa"
         modal
         footer={deleteDialogFooter}
@@ -272,7 +280,7 @@ export default function CourseListPage() {
         <div className="flex items-center gap-4">
           <i className="pi pi-exclamation-triangle text-red-500 text-3xl" />
           <span>
-            Bạn có chắc chắn muốn xóa khóa học{' '}
+            Bạn có chắc chắn muốn xóa khóa học{" "}
             <strong>{selectedCourse?.name}</strong> không?
           </span>
         </div>

@@ -16,11 +16,11 @@ export class PermissionService {
       return PermissionMapper.fromListModelToListDto(res);
     } catch (err) {
       console.error(
-        'PermissionSerivce.findAll: Cannot get all Permission',
+        'PermissionService.findAll: Cannot get all Permission',
         err,
       );
+      return []; // Trả về mảng rỗng thay vì cú pháp sai
     }
-    return new ResponsePermissionDto[0]();
   }
 
   async findById(id: number): Promise<PermissionDto | null> {
@@ -39,16 +39,25 @@ export class PermissionService {
     createDto: CreatePermissionDto,
   ): Promise<ResponsePermissionDto | null> {
     const res = new ResponsePermissionDto();
-    if (createDto.name && this.findByName(createDto.name) != null) {
+
+    // FIX: Phải có await ở đây
+    const existingPerm = await this.findByName(createDto.name);
+    if (existingPerm) {
       res.pushError({
         key: 'name',
         value: `Tên quyền ${createDto.name} đã tồn tại`,
       });
       return res;
     }
-    const newPerm = await this.permRepo.create(createDto);
-    if (!newPerm) return res;
-    res.permission = PermissionMapper.fromModelToDto(newPerm);
+
+    try {
+      const newPerm = await this.permRepo.create(createDto);
+      res.permission = PermissionMapper.fromModelToDto(newPerm);
+    } catch (error) {
+      console.error(error);
+      res.pushError({ key: 'global', value: 'Lỗi khi tạo quyền' });
+    }
+
     return res;
   }
 
@@ -57,28 +66,42 @@ export class PermissionService {
     updateDto: UpdatePermissionDto,
   ): Promise<ResponsePermissionDto | null> {
     const res = new ResponsePermissionDto();
-    const old = await this.findById(updateDto.id);
-    const exist = await this.findByName(updateDto.name);
+
+    // 1. Kiểm tra quyền có tồn tại không
+    const old = await this.permRepo.findById(id); // Dùng trực tiếp repo để lấy model gốc
     if (!old) {
       res.pushError({
         key: 'global',
-        value: `Quyền ${id} không tồn tại`,
+        value: `Quyền với id ${id} không tồn tại`,
       });
       return res;
     }
-    if (old?.name != updateDto.name && exist != null) {
-      res.pushError({
-        key: 'name',
-        value: `Tên quyền ${updateDto.name} đã tồn tại`,
-      });
-      return res;
+
+    // 2. Logic kiểm tra trùng tên (Chỉ check nếu có gửi name và name thay đổi)
+    if (updateDto.name && updateDto.name !== old.name) {
+      const exist = await this.findByName(updateDto.name);
+      if (exist) {
+        res.pushError({
+          key: 'name',
+          value: `Tên quyền "${updateDto.name}" đã được sử dụng`,
+        });
+        return res;
+      }
     }
+
     try {
-      const updatedPerm = await this.permRepo.update(id, updateDto);
-      if (!updatedPerm) return res;
+      // Loại bỏ id ra khỏi data update để tránh lỗi Prisma (nếu DTO có id)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _, ...dataToUpdate } = updateDto as any;
+
+      const updatedPerm = await this.permRepo.update(id, dataToUpdate);
       res.permission = PermissionMapper.fromModelToDto(updatedPerm);
-    } catch {
-      res.pushError({ key: 'global', value: 'Lỗi không xác định' });
+    } catch (err) {
+      console.error(err);
+      res.pushError({
+        key: 'global',
+        value: 'Lỗi không xác định khi cập nhật',
+      });
     }
     return res;
   }
@@ -87,11 +110,6 @@ export class PermissionService {
     const res = new ResponsePermissionDto();
     try {
       const delPerm = await this.permRepo.delete(id);
-      if (!delPerm)
-        res.pushError({
-          key: 'global',
-          value: `Không thể xóa quyền với Id ${id}`,
-        });
       res.permission = PermissionMapper.fromModelToDto(delPerm);
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -100,9 +118,10 @@ export class PermissionService {
           value: `Không tìm thấy quyền với Id ${id}`,
         });
       } else {
+        console.error(err);
         res.pushError({
           key: 'global',
-          value: `Lỗi không xác định`,
+          value: `Lỗi không xác định khi xóa`,
         });
       }
     }

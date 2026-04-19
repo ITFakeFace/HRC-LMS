@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Permission, Prisma } from '@prisma/client';
-import { Optional } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -43,7 +42,6 @@ export class PermissionRepository {
         where: { id },
       });
     } catch (error) {
-      // Xử lý lỗi nếu không tìm thấy ID
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025'

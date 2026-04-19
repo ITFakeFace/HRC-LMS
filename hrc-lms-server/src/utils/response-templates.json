@@ -1,0 +1,195 @@
+{
+  "consultation": [
+    {
+      "id": "formal_1",
+      "name": "Trang trọng",
+      "header": "Thưa quý khách, dưới đây là thông tin chi tiết về khóa học:",
+      "footer": "\n\nTrân trọng.",
+      "empty": "Chúng tôi chưa cập nhật thông tin mà quý khách yêu cầu.",
+      "course_header": "\n\n🔷 KHÓA HỌC: {name} ({code})",
+      "summary_template": "Tìm thấy {count} khóa học. Vui lòng hỏi cụ thể hơn.",
+      "intent_map": {
+        "tên": "name",
+        "mã": "code",
+        "mục tiêu": "objectives",
+        "đối tượng học": "audiences",
+        "yêu cầu": "requirements",
+        "tài liệu": "materials",
+        "thời lượng": "duration",
+        "tổng quan": "description",
+        "lịch học": "schedule",
+        "học phí": "tuition",
+        "địa điểm": "locations",
+        "giảng viên": "instructors",
+        "nội dung": "contents",
+        "đánh giá": "assessment"
+      },
+      "field_dictionary": {
+        "name": { "label": "📘 Tên khóa", "is_list": false },
+        "code": { "label": "🔖 Mã khóa", "is_list": false },
+        "objectives": {
+          "label": "🎯 Mục tiêu đào tạo",
+          "is_list": true,
+          "bullet": "✓ "
+        },
+        "audiences": {
+          "label": "👥 Đối tượng",
+          "is_list": true,
+          "bullet": "- "
+        },
+        "requirements": {
+          "label": "❗ Yêu cầu",
+          "is_list": true,
+          "bullet": "🔸 "
+        },
+        "duration": { "label": "⏳ Thời lượng", "is_list": false },
+        "schedule": {
+          "label": "📅 Lịch học",
+          "is_list": true,
+          "bullet": "🗓️ "
+        },
+        "locations": {
+          "label": "📍 Địa điểm",
+          "is_list": true,
+          "bullet": "Map: "
+        },
+        "instructors": {
+          "label": "👨‍🏫 Giảng viên",
+          "is_list": true,
+          "bullet": "🎓 "
+        },
+        "contents": {
+          "label": "📚 Nội dung chi tiết",
+          "is_list": false,
+          "sub_bullet": "- "
+        },
+        "assessment": {
+          "label": "📝 Đánh giá & Thi",
+          "is_list": false,
+          "key_map": {
+            "part_exam": "Kiểm tra quá trình",
+            "final_exam": "Thi cuối kỳ",
+            "method": "Hình thức thi"
+          }
+        },
+        "materials": {
+          "label": "📖 Tài liệu & Phần mềm",
+          "is_list": false,
+          "key_map": {
+            "mandatory": "Giáo trình bắt buộc",
+            "references": "Tài liệu tham khảo",
+            "software": "Phần mềm hỗ trợ"
+          }
+        }
+      }
+    },
+    {
+      "id": "friendly_1",
+      "name": "Thân thiện",
+      "header": "Thông tin chi tiết bạn cần đây nè:",
+      "footer": "\n\nCần gì ới mình nha! 😉",
+      "empty": "Hic, không tìm thấy khóa nào cả.",
+      "course_header": "\n\n✨ {name}",
+      "summary_template": "Woa, có tới {count} khóa lận. Bạn hỏi kỹ hơn xíu nha.",
+      "intent_map": {
+        "tên": "name",
+        "mã": "code",
+        "mục tiêu": "objectives",
+        "đối tượng học": "audiences",
+        "yêu cầu": "requirements",
+        "tài liệu": "materials",
+        "thời lượng": "duration",
+        "tổng quan": "description",
+        "lịch học": "schedule",
+        "học phí": "tuition",
+        "địa điểm": "locations",
+        "giảng viên": "instructors",
+        "nội dung": "contents",
+        "đánh giá": "assessment"
+      },
+      "field_dictionary": {
+        "name": { "label": "Khóa học", "is_list": false },
+        "code": { "label": "Mã", "is_list": false },
+        "objectives": {
+          "label": "Học xong làm được gì?",
+          "is_list": true,
+          "bullet": "👉 "
+        },
+        "audiences": {
+          "label": "Ai nên học?",
+          "is_list": true,
+          "bullet": "+ "
+        },
+        "requirements": {
+          "label": "Cần chuẩn bị gì?",
+          "is_list": true,
+          "bullet": "⚡ "
+        },
+        "duration": { "label": "Thời gian học", "is_list": false },
+        "schedule": {
+          "label": "Lịch học nè",
+          "is_list": true,
+          "bullet": "📌 "
+        },
+        "locations": {
+          "label": "Học ở đâu?",
+          "is_list": true,
+          "bullet": "📍 "
+        },
+        "instructors": {
+          "label": "Thầy cô giáo",
+          "is_list": true,
+          "bullet": "⭐ "
+        },
+        "contents": {
+          "label": "📚 Nội dung chi tiết",
+          "is_list": false,
+          "sub_bullet": "- "
+        },
+        "assessment": {
+          "label": "💯 Cách tính điểm",
+          "is_list": false,
+          "key_map": {
+            "part_exam": "Điểm quá trình",
+            "final_exam": "Điểm chốt môn"
+          }
+        },
+        "materials": {
+          "label": "🎒 Đồ nghề",
+          "is_list": false,
+          "key_map": {
+            "mandatory": "Sách giáo khoa",
+            "references": "Đọc thêm cho vui",
+            "software": "App cần cài"
+          }
+        }
+      }
+    }
+  ],
+  "booking": [
+    {
+      "id": "default_1",
+      "name": "Tiêu chuẩn (Giống code cũ)",
+      "ask_fullname": "Tôi có thể xin tên của bạn để tiện xưng hô không?",
+      "ask_contact": "Chào {fullname}, bạn cho mình xin số điện thoại hoặc email để liên hệ nhé?",
+      "ask_email": "Bạn bổ sung thêm email giúp mình nhé?",
+      "ask_phone": "Bạn bổ sung thêm số điện thoại giúp mình nhé?",
+      "ask_time": "Bạn muốn đặt lịch tư vấn vào thời gian nào?",
+      "ask_method": "Bạn muốn tư vấn trực tiếp (offline) hay qua online?",
+      "ask_destination": "Bạn muốn gặp mặt tại địa điểm nào hoặc qua nền tảng nào?",
+      "confirmation": "Tuyệt vời! Mình xác nhận lại: Bạn là {fullname}, hẹn {method} vào lúc {time}. Bên mình sẽ liên hệ sớm!"
+    },
+    {
+      "id": "friendly_1",
+      "name": "Thân thiện (GenZ)",
+      "ask_fullname": "Chào bạn, mình chưa biết tên bạn nè, cho mình xin tên nhé?",
+      "ask_contact": "Hello {fullname}, cho mình xin SĐT hoặc Email để gửi vé mời nha?",
+      "ask_email": "Cho mình xin thêm email để gửi tài liệu nha {fullname}?",
+      "ask_phone": "Alo, cho mình xin nốt SĐT để tiện liên lạc nhé?",
+      "ask_time": "Bạn rảnh vào khung giờ nào nè?",
+      "ask_method": "Bạn thích gặp trực tiếp hay call online?",
+      "ask_destination": "Chốt địa điểm (hoặc app) gặp nhau nha?",
+      "confirmation": "Chốt đơn! {fullname} hẹn {method} lúc {time} tại {destination} nha. See you soon! ❤️"
+    }
+  ]
+}

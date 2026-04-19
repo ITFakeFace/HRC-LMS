@@ -2,6 +2,7 @@
 import React from "react";
 import {
   faBell,
+  faCog,
   faCompress,
   faExpand,
   faHome,
@@ -113,6 +114,15 @@ const AdminLayout = ({
               icon={faSchool}
               url={"/admin/courses"}
               activeCondition={"/admin/courses"}
+              isCollapsed={navCollapsed}
+              matchType={MatchTypes.Prefix}
+            />
+            <NavItem
+              text={"Templates"}
+              iconType={IconTypes.FontAwesome}
+              icon={faCog}
+              url={"/admin/template-manager"}
+              activeCondition={"/admin/template-manager"}
               isCollapsed={navCollapsed}
               matchType={MatchTypes.Prefix}
             />

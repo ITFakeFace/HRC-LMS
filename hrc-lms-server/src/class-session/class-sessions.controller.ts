@@ -16,7 +16,7 @@ import { UpdateClassSessionDto } from './dto/update-class-session.dto';
 import { ResponseModel } from 'src/response-model/model/response-model.model';
 import { ClassSessionsService } from './class-session.service';
 
-@Controller('sessions')
+@Controller('class-sessions')
 @UseGuards(JwtAuthGuard)
 export class ClassSessionsController {
   constructor(private readonly sessionsService: ClassSessionsService) {}
@@ -24,7 +24,9 @@ export class ClassSessionsController {
   // 1. GET BY CLASS
   @Get('class/:classId')
   @HttpCode(HttpStatus.OK)
-  async findAllByClass(@Param('classId', ParseIntPipe) classId: number): Promise<ResponseModel> {
+  async findAllByClass(
+    @Param('classId', ParseIntPipe) classId: number,
+  ): Promise<ResponseModel> {
     const data = await this.sessionsService.findAllByClass(classId);
     return new ResponseModel({
       status: true,
@@ -97,10 +99,10 @@ export class ClassSessionsController {
   @HttpCode(HttpStatus.OK)
   async openAttendance(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: any
+    @Req() req: any,
   ): Promise<ResponseModel> {
     const teacherId = req.user.id;
-    
+
     const res = await this.sessionsService.openAttendance(id, teacherId);
 
     if (res.hasErrors()) {
@@ -125,7 +127,9 @@ export class ClassSessionsController {
   // POST /sessions/:id/attendance/close
   @Post(':id/attendance/close')
   @HttpCode(HttpStatus.OK)
-  async closeAttendance(@Param('id', ParseIntPipe) id: number): Promise<ResponseModel> {
+  async closeAttendance(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseModel> {
     const res = await this.sessionsService.closeAttendance(id);
 
     if (res.hasErrors()) {
@@ -150,7 +154,9 @@ export class ClassSessionsController {
   // POST /sessions/:id/finish
   @Post(':id/finish')
   @HttpCode(HttpStatus.OK)
-  async finishSession(@Param('id', ParseIntPipe) id: number): Promise<ResponseModel> {
+  async finishSession(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseModel> {
     const res = await this.sessionsService.finishSession(id);
     if (res.hasErrors()) {
       return new ResponseModel({

@@ -22,7 +22,11 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FormRequestsModule } from './form-requests/form-requests.module';
 import { ErrorReportsModule } from './error-reports/error-reports.module';
-
+import { ChatModule } from './chat/chat.module';
+import { AiModule } from './ai/ai.module';
+import { ChatContentModule } from './chat-content/chat-content.module';
+import { ConsultationBookingModule } from './consultation-booking/consultation-booking.module';
+import { TemplateModule } from './template/template.module';
 
 @Module({
   imports: [
@@ -33,10 +37,10 @@ import { ErrorReportsModule } from './error-reports/error-reports.module';
       // envFilePath: ['.env'],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'public'), 
-      
+      rootPath: join(process.cwd(), 'public'),
+
       serveRoot: '/public', // URL prefix: localhost:3000/public/...
-      
+
       // Tùy chọn: Tắt việc render index.html khi không tìm thấy file (để tránh lỗi ENOENT index.html gây hiểu nhầm)
       renderPath: undefined,
     }),
@@ -72,8 +76,14 @@ import { ErrorReportsModule } from './error-reports/error-reports.module';
     SessionsModule,
     AttendanceModule,
     ImageModule,
-    FormRequestsModule, 
+    FormRequestsModule,
     ErrorReportsModule,
+    SessionsModule,
+    ChatModule,
+    AiModule,
+    ChatContentModule,
+    ConsultationBookingModule,
+    TemplateModule,
   ],
   controllers: [AppController],
   providers: [AppService],

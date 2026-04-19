@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -13,34 +13,21 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import { Permission } from "@/src/features/permissions/interfaces/Permission.interface";
 
-const PermissionsListPage: React.FC = () => {
-  const [permissions, setPermissions] = useState<Permission[]>([
-    { id: 1, name: "VIEW_USERS", description: "Xem danh sách người dùng" },
-    { id: 2, name: "CREATE_USERS", description: "Tạo người dùng mới" },
-    {
-      id: 3,
-      name: "UPDATE_USERS",
-      description: "Cập nhật thông tin người dùng",
-    },
-    { id: 4, name: "DELETE_USERS", description: "Xóa người dùng" },
-    { id: 5, name: "VIEW_ROLES", description: "Xem danh sách Roles" },
-    { id: 6, name: "UPDATE_PERMISSIONS", description: "Cập nhật Permissions" },
-    { id: 7, name: "VIEW_COURSES", description: "Xem danh sách khóa học" },
-    { id: 8, name: "CREATE_PERMISSIONS", description: "Tạo Permissions mới" },
-    { id: 9, name: "CREATE_ROLES", description: "Tạo Roles mới" },
-    { id: 10, name: "CREATE_COURSES", description: "Tạo khóa học mới" },
-    { id: 11, name: "DELETE_ROLES", description: "Xóa Roles" },
-    { id: 12, name: "UPDATE_COURSES", description: "Cập nhật khóa học" },
-    { id: 13, name: "UPDATE_ROLES", description: "Cập nhật Roles" },
-    {
-      id: 14,
-      name: "VIEW_PERMISSIONS",
-      description: "Xem danh sách Permissions",
-    },
-    { id: 15, name: "DELETE_PERMISSIONS", description: "Xóa Permissions" },
-    { id: 16, name: "DELETE_COURSES", description: "Xóa khóa học" },
-  ]);
+// Định nghĩa Interface cho Response trả về từ NestJS
+interface ApiResponse<T> {
+  status: boolean;
+  statusCode: number;
+  message: string;
+  data: T;
+  errors?: any[];
+}
 
+// Cấu hình đường dẫn API (Thay đổi port nếu cần)
+const API_URL = "http://localhost:3000/permissions";
+
+const PermissionsListPage: React.FC = () => {
+  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [visible, setVisible] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [currentPermission, setCurrentPermission] = useState<Permission>({
@@ -50,6 +37,30 @@ const PermissionsListPage: React.FC = () => {
   });
 
   const toast = useRef<Toast>(null);
+
+  // Hàm load dữ liệu từ API
+  const fetchPermissions = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(API_URL);
+      const resData: ApiResponse<Permission[]> = await response.json();
+
+      if (resData.status) {
+        setPermissions(resData.data);
+      } else {
+        showError(resData.message);
+      }
+    } catch (error) {
+      showError("Không thể kết nối đến máy chủ");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Gọi API khi component mount
+  useEffect(() => {
+    fetchPermissions();
+  }, []);
 
   const openNew = () => {
     setCurrentPermission({ id: 0, name: "", description: "" });
@@ -68,7 +79,27 @@ const PermissionsListPage: React.FC = () => {
     setCurrentPermission({ id: 0, name: "", description: "" });
   };
 
-  const savePermission = () => {
+  // Helper hiển thị thông báo
+  const showSuccess = (msg: string) => {
+    toast.current?.show({
+      severity: "success",
+      summary: "Thành công",
+      detail: msg,
+      life: 3000,
+    });
+  };
+
+  const showError = (msg: string) => {
+    toast.current?.show({
+      severity: "error",
+      summary: "Lỗi",
+      detail: msg,
+      life: 3000,
+    });
+  };
+
+  const savePermission = async () => {
+    // Validate client-side cơ bản
     if (
       !currentPermission.name.trim() ||
       !currentPermission.description.trim()
@@ -82,30 +113,52 @@ const PermissionsListPage: React.FC = () => {
       return;
     }
 
-    if (isEdit) {
-      setPermissions(
-        permissions.map((p) =>
-          p.id === currentPermission.id ? currentPermission : p
-        )
-      );
-      toast.current?.show({
-        severity: "success",
-        summary: "Thành công",
-        detail: "Cập nhật Permission thành công",
-        life: 3000,
-      });
-    } else {
-      const newId = Math.max(...permissions.map((p) => p.id), 0) + 1;
-      setPermissions([...permissions, { ...currentPermission, id: newId }]);
-      toast.current?.show({
-        severity: "success",
-        summary: "Thành công",
-        detail: "Tạo Permission mới thành công",
-        life: 3000,
-      });
-    }
+    try {
+      let response;
+      let url;
+      let method;
 
-    hideDialog();
+      if (isEdit) {
+        // Update Logic (PUT)
+        url = `${API_URL}/${currentPermission.id}`;
+        method = "PUT";
+      } else {
+        // Create Logic (POST)
+        url = API_URL;
+        method = "POST";
+      }
+
+      // Loại bỏ ID khi gửi body (nếu create) hoặc chỉ gửi name/desc
+      const payload = {
+        name: currentPermission.name,
+        description: currentPermission.description,
+      };
+
+      response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const resData: ApiResponse<Permission> = await response.json();
+
+      if (resData.status) {
+        showSuccess(resData.message);
+        fetchPermissions(); // Reload lại bảng dữ liệu
+        hideDialog();
+      } else {
+        // Xử lý lỗi từ backend (ví dụ validation error)
+        const errorMsg =
+          resData.errors && resData.errors.length > 0
+            ? JSON.stringify(resData.errors)
+            : resData.message;
+        showError(errorMsg);
+      }
+    } catch (error) {
+      showError("Đã xảy ra lỗi khi lưu dữ liệu");
+    }
   };
 
   const confirmDelete = (permission: Permission) => {
@@ -115,14 +168,23 @@ const PermissionsListPage: React.FC = () => {
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Xóa",
       rejectLabel: "Hủy",
-      accept: () => {
-        setPermissions(permissions.filter((p) => p.id !== permission.id));
-        toast.current?.show({
-          severity: "success",
-          summary: "Thành công",
-          detail: "Xóa Permission thành công",
-          life: 3000,
-        });
+      acceptClassName: "p-button-danger",
+      accept: async () => {
+        try {
+          const response = await fetch(`${API_URL}/${permission.id}`, {
+            method: "DELETE",
+          });
+          const resData: ApiResponse<Permission> = await response.json();
+
+          if (resData.status) {
+            showSuccess(resData.message);
+            fetchPermissions(); // Reload lại bảng
+          } else {
+            showError(resData.message);
+          }
+        } catch (error) {
+          showError("Không thể xóa bản ghi này");
+        }
       },
     });
   };
@@ -177,12 +239,14 @@ const PermissionsListPage: React.FC = () => {
 
       <DataTable
         value={permissions}
+        loading={loading} // Hiển thị loading spinner
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25, 50]}
         tableStyle={{ minWidth: "50rem" }}
         stripedRows
         showGridlines
+        emptyMessage="Không tìm thấy dữ liệu"
       >
         <Column field="id" header="ID" sortable style={{ width: "10%" }} />
         <Column field="name" header="Tên" sortable style={{ width: "30%" }} />

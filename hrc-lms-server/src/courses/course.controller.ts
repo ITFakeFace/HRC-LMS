@@ -13,7 +13,7 @@ import {
   Req,
   UseInterceptors, // MỚI
   UploadedFile,
-  Query,    // MỚI
+  Query, // MỚI
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // MỚI
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -32,23 +32,29 @@ export class CoursesController {
   // Phải dùng Interceptor để đọc form-data (kể cả khi không up ảnh thì DTO vẫn nằm trong form-data)
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('coverImage', createMulterOptions('courses'))) // Key là 'coverImage', lưu vào folder 'courses'
+  @UseInterceptors(
+    FileInterceptor('coverImage', createMulterOptions('courses')),
+  ) // Key là 'coverImage', lưu vào folder 'courses'
   async create(
     @Body() createCourseDto: CreateCourseDto,
     @Req() req: any,
     @UploadedFile() file?: Express.Multer.File, // File có thể null
   ): Promise<ResponseModel> {
     const userId = req.user.id;
-    
+
     // --- XỬ LÝ ẢNH ---
     let imageUrl = '';
     if (file) {
-        // Tạo đường dẫn tĩnh để lưu vào DB
-        imageUrl = `/public/images/courses/${file.filename}`;
+      // Tạo đường dẫn tĩnh để lưu vào DB
+      imageUrl = `/public/images/courses/${file.filename}`;
     }
 
     // Truyền imageUrl vào Service (Service đã sửa ở bước trước để nhận tham số thứ 3)
-    const res = await this.coursesService.create(createCourseDto, userId, imageUrl);
+    const res = await this.coursesService.create(
+      createCourseDto,
+      userId,
+      imageUrl,
+    );
 
     if (res.hasErrors()) {
       return new ResponseModel({
@@ -90,8 +96,12 @@ export class CoursesController {
     @Query('toDate') toDate: string,
   ): Promise<ResponseModel> {
     // Gọi service đã viết ở bước trước
-    const data = await this.coursesService.getTeacherSchedule(teacherId, fromDate, toDate);
-    
+    const data = await this.coursesService.getTeacherSchedule(
+      teacherId,
+      fromDate,
+      toDate,
+    );
+
     return new ResponseModel({
       status: true,
       statusCode: HttpStatus.OK,
@@ -103,7 +113,9 @@ export class CoursesController {
   // 3. READ ONE (GET /courses/:id)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async findById(@Param('id', ParseIntPipe) id: number): Promise<ResponseModel> {
+  async findById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseModel> {
     const res = await this.coursesService.findOne(id);
 
     if (res.hasErrors()) {
@@ -135,12 +147,13 @@ export class CoursesController {
   }
 
   // --- 🔴 3. GET TEACHER SCHEDULE (MỚI THÊM) ---
-  
 
   // 4. UPDATE (PUT /courses/:id)
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('coverImage', createMulterOptions('courses'))) 
+  @UseInterceptors(
+    FileInterceptor('coverImage', createMulterOptions('courses')),
+  )
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCourseDto: UpdateCourseDto,
@@ -156,17 +169,22 @@ export class CoursesController {
     console.log('3. File Object:', file); // QUAN TRỌNG: Nếu cái này là undefined -> Lỗi Frontend
     // ------------------------------------
 
-    let imageUrl : string|null|undefined = undefined; 
-    
+    let imageUrl: string | null | undefined = undefined;
+
     // Nếu file tồn tại thì mới tạo đường dẫn
     if (file) {
-        console.log('-> File detected! Filename:', file.filename);
-        imageUrl = `/public/images/courses/${file.filename}`;
+      console.log('-> File detected! Filename:', file.filename);
+      imageUrl = `/public/images/courses/${file.filename}`;
     } else {
-        console.log('-> No file detected in request.');
+      console.log('-> No file detected in request.');
     }
 
-    const res = await this.coursesService.update(id, updateCourseDto, userId, imageUrl);
+    const res = await this.coursesService.update(
+      id,
+      updateCourseDto,
+      userId,
+      imageUrl,
+    );
 
     if (res.hasErrors()) {
       if (res.errors.some((err) => err.key === 'id')) {

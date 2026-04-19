@@ -43,6 +43,7 @@ const teachersData = [
     fullname: 'Nguyễn Thầy A',
     gender: true, // Nam
     dob: new Date('1985-05-15'),
+    avatar: '\\public\\default\\images\\users\\default.png',
   },
   {
     pID: 'GV002',
@@ -52,6 +53,7 @@ const teachersData = [
     fullname: 'Trần Cô B',
     gender: false, // Nữ
     dob: new Date('1990-10-20'),
+    avatar: '\\public\\default\\images\\users\\default.png',
   },
 ];
 
@@ -64,6 +66,7 @@ const studentsData = [
     fullname: 'Lê Học Trò 1',
     gender: true, // Nam
     dob: new Date('2003-01-01'),
+    avatar: '\\public\\default\\images\\users\\default.png',
   },
   {
     pID: 'HV002',
@@ -73,6 +76,7 @@ const studentsData = [
     fullname: 'Phạm Học Trò 2',
     gender: false, // Nữ
     dob: new Date('2003-06-15'),
+    avatar: '\\public\\default\\images\\users\\default.png',
   },
   {
     pID: 'HV003',
@@ -82,6 +86,7 @@ const studentsData = [
     fullname: 'Hoàng Học Trò 3',
     gender: true, // Nam
     dob: new Date('2004-12-25'),
+    avatar: '\\public\\default\\images\\users\\default.png',
   },
 ];
 
@@ -124,7 +129,9 @@ export const seedAccounts = async (prisma: PrismaClient) => {
 
   // 3. ASSIGN PERMISSIONS TO SUPER_ADMIN
   console.log('3. Assigning Permissions to SUPER_ADMIN...');
-  const allPermissions = await prisma.permission.findMany({ select: { id: true } });
+  const allPermissions = await prisma.permission.findMany({
+    select: { id: true },
+  });
   const permissionIds = allPermissions.map((p) => ({ id: p.id }));
 
   await prisma.role.update({
@@ -135,8 +142,10 @@ export const seedAccounts = async (prisma: PrismaClient) => {
 
   // 4. SEED SUPER ADMIN USER
   console.log('4. Seeding SUPER_ADMIN User...');
-  const superAdminRole = await prisma.role.findUnique({ where: { shortname: 'SUPER_ADMIN' } });
-  
+  const superAdminRole = await prisma.role.findUnique({
+    where: { shortname: 'SUPER_ADMIN' },
+  });
+
   if (superAdminRole) {
     const adminPassword = process.env.ADMIN_PASSWORD || 'ChangeMe123@';
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -158,21 +167,53 @@ export const seedAccounts = async (prisma: PrismaClient) => {
         dob: new Date('1990-01-01T00:00:00Z'),
         isEmailVerified: true,
         roles: { connect: [{ id: superAdminRole.id }] },
+        avatar: '\\public\\default\\images\\users\\default.png',
       },
     });
     console.log(`\t[✔] Admin user created: ${superAdminEmail}`);
+
+    // =========================================================================
+    // 4.5. SEED CHATBOT USER (THÊM MỚI TẠI ĐÂY)
+    // =========================================================================
+    console.log('4.5. Seeding CHATBOT User...');
+
+    await prisma.user.upsert({
+      where: { username: 'chatbot' }, // Hoặc check theo email 'chatbot@hrc.com'
+      update: {
+        // Nếu user đã tồn tại, update lại quyền để đảm bảo nó vẫn chạy được
+        roles: { connect: { id: superAdminRole.id } },
+      },
+      create: {
+        id: -1, // [QUAN TRỌNG] Gán cứng ID âm để dễ nhận biết và không ảnh hưởng Auto Increment
+        pID: 'BOT001',
+        username: 'chatbot',
+        email: 'chatbot@hrc.com',
+        phone: '0000000000',
+        password: hashedCommonPassword, // Password mặc định
+        fullname: 'HRC Assistant Bot',
+        gender: true, // Robot tính là Nam hoặc Nữ tùy bạn :D
+        dob: new Date(), // Ngày sinh là ngày tạo
+        avatar: '\\public\\default\\images\\users\\botAvatar.png', // Nhớ tạo file ảnh này
+        isEmailVerified: true,
+        roles: {
+          connect: { id: superAdminRole.id }, // Gán quyền Admin để Bot đọc được mọi dữ liệu
+        },
+      },
+    });
+    console.log(`\t[✔] Chatbot user created (ID: -1).`);
   }
 
   // 5. SEED TEACHERS
   console.log('5. Seeding Teachers...');
-  const teacherRole = await prisma.role.findUnique({ where: { shortname: 'TEACHER' } });
-  
+  const teacherRole = await prisma.role.findUnique({
+    where: { shortname: 'TEACHER' },
+  });
+
   if (teacherRole) {
     for (const t of teachersData) {
       await prisma.user.upsert({
-        where: { username: t.username }, // Check trùng username
+        where: { username: t.username },
         update: {
-          // Update thông tin nếu muốn, hoặc để trống
           roles: { connect: { id: teacherRole.id } },
         },
         create: {
@@ -184,6 +225,7 @@ export const seedAccounts = async (prisma: PrismaClient) => {
           fullname: t.fullname,
           gender: t.gender,
           dob: t.dob,
+          avatar: t.avatar,
           isEmailVerified: true,
           roles: {
             connect: { id: teacherRole.id },
@@ -198,7 +240,9 @@ export const seedAccounts = async (prisma: PrismaClient) => {
 
   // 6. SEED STUDENTS
   console.log('6. Seeding Students...');
-  const studentRole = await prisma.role.findUnique({ where: { shortname: 'STUDENT' } });
+  const studentRole = await prisma.role.findUnique({
+    where: { shortname: 'STUDENT' },
+  });
 
   if (studentRole) {
     for (const s of studentsData) {
@@ -216,6 +260,7 @@ export const seedAccounts = async (prisma: PrismaClient) => {
           fullname: s.fullname,
           gender: s.gender,
           dob: s.dob,
+          avatar: s.avatar,
           isEmailVerified: true,
           roles: {
             connect: { id: studentRole.id },

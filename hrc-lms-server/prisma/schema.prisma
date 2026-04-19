@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:123456@localhost:3306/KLTN_HRC_JS"
+  url = env("DATABASE_URL")
 }
 
 // =========================================================================
@@ -50,6 +50,9 @@ model User {
   openedSessions  ClassSession[]     @relation("SessionOpener") // Các buổi học mà user này đã bấm "Mở điểm danh"
   formRequests    FormRequest[] // Danh sách yêu cầu đã gửi
   errorReports    ErrorReport[] // Danh sách báo lỗi đã gửi
+
+  // Thêm dòng này để User có thể xem lại các session cũ
+  clientSessions  ClientSession[]
 
   @@map("Users")
 }
@@ -258,7 +261,7 @@ model AttendanceRecord {
   // Liên kết với Sinh viên
   stdId     Int
   student   User             @relation(fields: [stdId], references: [id])
-
+  
   // Trạng thái & Kết quả
   status    AttendanceStatus @default(ABSENT) 
   note      String?          @db.VarChar(255)
@@ -279,6 +282,11 @@ model ClientSession {
   AIEnable  Boolean       @default(true)
   isEnded   Boolean       @default(false)
   createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  // Thêm trường UserId (có thể null)
+  userId    Int?
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  bookingState  Json?
   messages  ChatContent[]
 
   @@map("ClientSessions")
@@ -286,7 +294,7 @@ model ClientSession {
 
 model ChatContent {
   id        Int           @id @default(autoincrement())
-  message   String        @db.VarChar(255)
+  message   String        @db.Text
   isRead    Boolean       @default(false)
   createdAt DateTime      @default(now())
 
@@ -349,6 +357,30 @@ model ErrorReport {
   @@map("ErrorReports")
 }
 
+model ConsultationBooking {
+  id          Int       @id @default(autoincrement())
+
+  // --- Thông tin khách hàng ---
+  fullname    String    @db.VarChar(255)
+  phone       String?   @db.VarChar(50)  // Cho phép null nếu khách chỉ nhập email
+  email       String?   @db.VarChar(255) // Cho phép null nếu khách chỉ nhập phone
+  
+  // --- Chi tiết lịch hẹn ---
+  method      String    @db.VarChar(50)  // "Trực tiếp", "Online",...
+  time        DateTime  // Prisma tự lưu format ISO-8601
+  destination String?   @db.Text         // Link Google Meet hoặc địa chỉ văn phòng
+
+  // --- Quản trị (Admin Fields) ---
+  status      BookingStatus @default(PENDING) // Trạng thái đơn
+  adminNotes  String?       @db.Text        // Ghi chú của admin (VD: "Khách hẹn lại")
+
+  // --- Metadata ---
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("ConsultationBookings")
+}
+
 // =========================================================================
 //                                ENUMS
 // =========================================================================
@@ -390,4 +422,12 @@ enum RequestStatus {
   PENDING   // Đang chờ xử lý
   RESOLVED  // Đã giải quyết / Đã duyệt
   REJECTED  // Đã từ chối / Không hợp lệ
+}
+
+// Enum trạng thái để Admin dễ lọc
+enum BookingStatus {
+  PENDING    // Chờ xử lý (Mới)
+  CONFIRMED  // Đã xác nhận/Đã gọi
+  COMPLETED  // Đã tư vấn xong
+  CANCELLED  // Khách hủy
 }
